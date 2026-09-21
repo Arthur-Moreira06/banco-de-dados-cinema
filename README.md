@@ -12,8 +12,8 @@ O sistema simula a administração de uma rede de cinemas, controlando os princi
  Controle de pagamentos, pontos de fidelidade e regras de negócio complexas validadas por triggers.
 
 Integrantes
-ARTHUR MOREIRA ALVES DA SILVA
-ANDREY GABRIEL LINS FERREIRA
-PAULO FERNANDO SANTOS AMORIM DOS REIS
-ALEXANDRE BRAGA RODRIGUES
-ANA BEATRIZ CALDEIRA FAULIN 
+ ARTHUR MOREIRA ALVES DA SILVA;
+ ANDREY GABRIEL LINS FERREIRA;
+ PAULO FERNANDO SANTOS AMORIM DOS REIS;
+ ALEXANDRE BRAGA RODRIGUES;
+ ANA BEATRIZ CALDEIRA FAULIN; 
