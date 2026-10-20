@@ -54,6 +54,62 @@ public class ConsultaWebRepository {
                 """, dataInicial, dataFinal, categoria, categoria);
     }
 
+    public List<Map<String,Object>> graficoVendasGerais(String inicio, String fim) {
+        Date dataInicial = Date.valueOf(LocalDate.parse(inicio));
+        Date dataFinal = Date.valueOf(LocalDate.parse(fim));
+        return jdbc.queryForList("""
+                SELECT 'Ingresso' AS tipo, f.titulo_original AS nome,
+                       COUNT(i.id_ingresso) AS unidades, COALESCE(SUM(i.preco_pago),0) AS faturamento
+                FROM ingresso i
+                JOIN sessao s ON s.id_sessao=i.id_sessao
+                JOIN filme f ON f.id_filme=s.id_filme
+                WHERE DATE(i.data_compra) BETWEEN ? AND ?
+                  AND COALESCE((SELECT h.status FROM ingresso_status_historico h
+                                WHERE h.id_ingresso=i.id_ingresso
+                                ORDER BY h.data_hora DESC,h.id_status_hist DESC LIMIT 1), 'Reservado') IN ('Pago','Utilizado')
+                GROUP BY f.id_filme,f.titulo_original
+                UNION ALL
+                SELECT CONCAT('Produto · ',p.categoria) AS tipo, p.nome,
+                       SUM(vp.quantidade) AS unidades,
+                       SUM(vp.quantidade*vp.preco_unitario_venda) AS faturamento
+                FROM venda v
+                JOIN pagamento pg ON pg.id_venda=v.id_venda
+                JOIN venda_produto vp ON vp.id_venda=v.id_venda
+                JOIN produto p ON p.id_produto=vp.id_produto
+                WHERE DATE(pg.data_pagamento) BETWEEN ? AND ?
+                GROUP BY p.id_produto,p.nome,p.categoria
+                ORDER BY faturamento DESC,nome
+                """, dataInicial, dataFinal, dataInicial, dataFinal);
+    }
+
+    public List<Map<String,Object>> filmesComSessoes() {
+        return jdbc.queryForList("""
+                SELECT f.id_filme AS id, f.titulo_original AS titulo, f.sinopse,
+                       f.genero_principal AS genero, f.classificacao_indicativa AS classificacao,
+                       f.data_estreia, f.url_capa AS capa,
+                       s.id_sessao AS sessao_id, s.data_sessao AS data, s.horario_inicio AS horario,
+                       s.idioma, s.tipo, sa.numero AS sala,
+                       (SELECT ph.preco_base FROM sessao_preco_historico ph
+                        WHERE ph.id_sessao=s.id_sessao AND ph.vigencia_inicio<=NOW()
+                        ORDER BY ph.vigencia_inicio DESC,ph.id_preco DESC LIMIT 1) AS preco
+                FROM filme f
+                LEFT JOIN sessao s ON s.id_filme=f.id_filme
+                LEFT JOIN sala sa ON sa.id_sala=s.id_sala
+                ORDER BY f.titulo_original,s.data_sessao,s.horario_inicio
+                """);
+    }
+
+    public Map<String,Object> detalhesSessao(int sessaoId) {
+        return jdbc.queryForMap("""
+                SELECT f.titulo_original AS titulo, f.sinopse, f.data_estreia, f.url_capa AS capa,
+                       f.genero_principal AS genero, f.classificacao_indicativa AS classificacao,
+                       s.data_sessao AS data, s.horario_inicio AS horario, s.idioma, s.tipo, sa.numero AS sala
+                FROM sessao s JOIN filme f ON f.id_filme=s.id_filme
+                JOIN sala sa ON sa.id_sala=s.id_sala
+                WHERE s.id_sessao=?
+                """, sessaoId);
+    }
+
     public List<Map<String,Object>> relatorio() {
         return jdbc.queryForList("SELECT * FROM vw_relatorio_sessao ORDER BY data_sessao,horario_inicio");
     }

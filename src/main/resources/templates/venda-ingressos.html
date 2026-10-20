@@ -9,24 +9,45 @@
 </head>
 <body>
 <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
-<main class="container form-container">
+<main class="container ticket-program">
   <a class="back-link" href="/funcionario">← Voltar à área do funcionário</a>
-  <div class="form-card ticket-card">
-    <span class="eyebrow">BILHETERIA</span>
-    <h1>Vender ingressos</h1>
-    <p>Escolha uma sessão para ver os assentos livres e ocupados.</p>
-    <div class="alert" th:if="${erro}" th:text="${erro}"></div>
-    <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
+  <div class="page-heading">
+    <div><span class="eyebrow">BILHETERIA</span><h1>Escolha seu filme e sessão</h1><p>Confira os filmes em cartaz e selecione um horário para continuar a venda.</p></div>
+  </div>
+  <div class="alert" th:if="${erro}" th:text="${erro}"></div>
+  <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
 
-    <form class="session-picker" method="get" action="/funcionario/vendas-ingressos">
-      <label for="sessaoId">Sessão</label>
-      <select id="sessaoId" name="sessaoId" required onchange="this.form.submit()">
-        <option value="">Selecione uma sessão</option>
-        <option th:each="s : ${sessoes}" th:value="${s.id}" th:text="|ID ${s.id} — ${s.rotulo}|" th:selected="${sessaoSelecionada != null and sessaoSelecionada == s.id}"></option>
-      </select>
-    </form>
+  <section class="movie-showtime-list" aria-label="Filmes e horários disponíveis">
+    <article class="movie-showtime" th:each="filme : ${filmesProgramacao}">
+      <div class="movie-poster">
+        <img th:if="${filme.capa != null and !#strings.isEmpty(filme.capa)}" th:src="${filme.capa}" th:alt="|Capa de ${filme.titulo}|">
+        <div class="movie-poster-placeholder" th:if="${filme.capa == null or #strings.isEmpty(filme.capa)}">
+          <span th:text="${filme.genero}">Cinema</span><strong th:text="${filme.titulo}">Filme</strong><small>CINEMA</small>
+        </div>
+      </div>
+      <div class="movie-information">
+        <div class="movie-title-line"><span class="eyebrow" th:text="${filme.genero}">Gênero</span><span class="rating-badge" th:classappend="${filme.classificacao == 'L' ? 'rating-free' : (filme.classificacao == '10' ? 'rating-10' : (filme.classificacao == '12' ? 'rating-12' : (filme.classificacao == '14' ? 'rating-14' : (filme.classificacao == '16' ? 'rating-16' : 'rating-18'))))}" th:text="${filme.classificacao == 'L' ? 'Livre' : filme.classificacao + ' anos'}">Livre</span></div>
+        <h2 th:text="${filme.titulo}">Título do filme</h2>
+        <p class="movie-synopsis" th:text="${filme.sinopse != null and !#strings.isEmpty(filme.sinopse) ? filme.sinopse : 'Sinopse ainda não cadastrada.'}">Sinopse do filme.</p>
+        <p class="premiere-date"><strong>Estreia</strong><span th:if="${filme.data_estreia != null}" th:text="${#dates.format(filme.data_estreia, 'dd/MM/yyyy')}">20/10/2026</span><span th:if="${filme.data_estreia == null}">Data não informada</span></p>
+        <div class="showtimes-heading"><h3>Horários</h3><span th:text="|${#lists.size(filme.sessoes)} sessões|">0 sessões</span></div>
+        <div class="showtime-list" th:if="${!#lists.isEmpty(filme.sessoes)}">
+          <a class="showtime-option" th:each="sessao : ${filme.sessoes}"
+             th:classappend="${sessaoSelecionada != null and sessaoSelecionada == sessao.id ? 'selected' : ''}"
+             th:href="|/funcionario/vendas-ingressos?sessaoId=${sessao.id}#compra|">
+            <span class="showtime-date" th:text="${#dates.format(sessao.data, 'EEE, dd/MM')}">Ter, 20/10</span>
+            <strong th:text="${#dates.format(sessao.horario, 'HH:mm')}">19:30</strong>
+            <small th:text="|${sessao.tipo} · ${sessao.idioma} · Sala ${sessao.sala}|">2D · Dublado · Sala 1</small>
+          </a>
+        </div>
+        <p class="no-showtimes" th:if="${#lists.isEmpty(filme.sessoes)}">Não há sessões programadas para este filme.</p>
+      </div>
+    </article>
+  </section>
 
-    <section class="seat-map" th:if="${sessaoSelecionada != null}" aria-label="Mapa de assentos">
+  <section id="compra" class="selected-session-panel" th:if="${sessaoSelecionada != null}" aria-label="Sessão selecionada">
+    <div><span class="eyebrow">SESSÃO SELECIONADA</span><h2 th:text="${detalhesSessao.titulo}">Filme</h2><p th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} às ${#dates.format(detalhesSessao.horario, 'HH:mm')} · ${detalhesSessao.tipo} · ${detalhesSessao.idioma} · Sala ${detalhesSessao.sala}|">Data e horário</p></div>
+    <div class="seat-map" aria-label="Mapa de assentos">
       <h2>Escolha seu assento</h2>
       <div class="screen" aria-label="Tela">TELA</div>
       <div class="seat-legend">
@@ -44,9 +65,8 @@
                   th:text="${a.numero}">1</button>
         </div>
       </div>
-    </section>
-
-    <form class="data-form ticket-form" method="post" th:action="@{/funcionario/vendas-ingressos}" th:if="${sessaoSelecionada != null}" data-seat-form>
+    </div>
+    <form class="data-form ticket-form" method="post" th:action="@{/funcionario/vendas-ingressos}" data-seat-form>
       <input type="hidden" name="sessaoId" th:value="${sessaoSelecionada}">
       <input type="hidden" id="assentoId" name="assentoId" required>
       <p class="seat-selection" data-seat-selection>Selecione um assento livre no mapa.</p>
@@ -56,8 +76,8 @@
       <div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div>
       <div class="form-actions"><a class="secondary-button" href="/funcionario">Cancelar</a><button class="primary-button" type="submit" data-submit-seat disabled>Registrar ingresso</button></div>
     </form>
-    <p class="seat-empty" th:if="${sessaoSelecionada != null and #lists.isEmpty(assentos)}">Esta sessão não possui assentos cadastrados.</p>
-  </div>
+  </section>
+  <p class="seat-empty" th:if="${sessaoSelecionada != null and #lists.isEmpty(assentos)}">Esta sessão não possui assentos cadastrados.</p>
 </main>
 </body>
 </html>

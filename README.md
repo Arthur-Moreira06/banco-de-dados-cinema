@@ -11,6 +11,9 @@ O sistema simula a administração de uma rede de cinemas, controlando os princi
  Processo de venda de ingressos (com controle de meia-entrada e histórico de status) e produtos de bomboniere.
  Controle de pagamentos, pontos de fidelidade e regras de negócio complexas validadas por triggers.
 
+Atualização do catálogo da aplicação web
+Para bancos já existentes, execute uma vez o script `sql/06_atualizar_catalogo_filmes.sql` antes de iniciar a aplicação. Ele adiciona data de estreia e URL da capa ao cadastro de filmes sem recriar o banco. Depois, preencha esses campos em Gerente > Filmes; a sinopse já existente também é exibida na seleção de sessões.
+
 Integrantes
  ARTHUR MOREIRA ALVES DA SILVA;
  ANDREY GABRIEL LINS FERREIRA;

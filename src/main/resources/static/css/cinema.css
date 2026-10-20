@@ -247,6 +247,59 @@ tbody tr:last-child td { border-bottom: 0; }
 .ticket-form button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 .seat-empty { color: var(--muted); text-align: center; }
 
+.ticket-program { max-width: 1180px; }
+.movie-showtime-list { display: grid; gap: 22px; }
+.movie-showtime { display: grid; grid-template-columns: minmax(180px, 245px) minmax(0, 1fr); gap: 26px; padding: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 24px #17101908; }
+.movie-poster { min-height: 330px; overflow: hidden; background: var(--input); border-radius: 12px; }
+.movie-poster img { display: block; width: 100%; height: 100%; min-height: 330px; object-fit: cover; }
+.movie-poster-placeholder { display: flex; min-height: 330px; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 22px; color: #fff; background: radial-gradient(ellipse at 25% 20%, #e95c59 0, transparent 42%), linear-gradient(150deg, #252c3d, #171923 70%); }
+.movie-poster-placeholder span { color: #ffd26f; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.movie-poster-placeholder strong { font-size: clamp(22px, 3vw, 34px); line-height: 1.05; text-wrap: balance; }
+.movie-poster-placeholder small { color: #ffffffa8; font-size: 11px; font-weight: 850; letter-spacing: .22em; }
+.movie-information { min-width: 0; }
+.movie-title-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.movie-title-line .eyebrow { margin: 0; }
+.rating-badge { padding: 5px 9px; color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border)); border-radius: 7px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.rating-badge.rating-free { color: #fff; background: #168c45; border-color: #168c45; }
+.rating-badge.rating-10 { color: #fff; background: #0878b9; border-color: #0878b9; }
+.rating-badge.rating-12 { color: #252525; background: #f5c400; border-color: #f5c400; }
+.rating-badge.rating-14 { color: #fff; background: #e87516; border-color: #e87516; }
+.rating-badge.rating-16 { color: #fff; background: #d3262b; border-color: #d3262b; }
+.rating-badge.rating-18 { color: #fff; background: #171717; border-color: #171717; }
+.movie-information h2 { margin: 8px 0 10px; font-size: clamp(23px, 3vw, 30px); }
+.movie-synopsis { max-width: 760px; min-height: 44px; margin: 0 0 16px; color: var(--muted); line-height: 1.55; }
+.premiere-date { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 18px; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 13px; }
+.premiere-date strong { color: var(--text); }
+.premiere-date span { color: var(--muted); }
+.showtimes-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
+.showtimes-heading h3 { margin: 0; font-size: 17px; }
+.showtimes-heading > span { color: var(--muted); font-size: 12px; }
+.showtime-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.showtime-option { display: grid; min-width: 140px; gap: 5px; padding: 11px 13px; color: var(--text); background: var(--subtle); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; transition: .15s; }
+.showtime-option:hover, .showtime-option.selected { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); border-color: var(--accent); transform: translateY(-1px); }
+.showtime-date, .showtime-option small { color: var(--muted); font-size: 11px; }
+.showtime-option strong { font-size: 19px; }
+.showtime-option small { line-height: 1.4; }
+.no-showtimes { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+.selected-session-panel { margin-top: 26px; padding: 22px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 16px; }
+.selected-session-panel > div:first-child h2 { margin: 6px 0; }
+.selected-session-panel > div:first-child p { margin: 0 0 18px; color: var(--muted); }
+.selected-session-panel .seat-map { margin: 0 0 22px; }
+.sales-chart { margin: 22px 0; padding: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 24px #17101908; }
+.sales-chart-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.sales-chart-heading .eyebrow { font-size: 11px; }
+.sales-chart-heading h2 { margin: 5px 0 0; font-size: 20px; }
+.chart-period { color: var(--muted); font-size: 12px; }
+.sales-chart-list { display: grid; gap: 15px; }
+.sales-chart-row { display: grid; grid-template-columns: minmax(150px, 240px) minmax(120px, 1fr); align-items: center; gap: 18px; }
+.sales-chart-label { display: grid; gap: 4px; min-width: 0; }
+.sales-kind { color: var(--accent); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.sales-chart-label strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sales-chart-label span { color: var(--muted); font-size: 12px; }
+.sales-bar-track { height: 16px; overflow: hidden; background: var(--input); border: 1px solid var(--border); border-radius: 20px; }
+.sales-bar-fill { display: block; width: var(--bar-width); height: 100%; background: linear-gradient(90deg, var(--accent), #ff8067); border-radius: inherit; transition: width .35s ease; }
+.chart-empty { margin: 0; padding: 24px 8px 8px; color: var(--muted); text-align: center; }
+
 @media (max-width: 650px) {
   .topbar { align-items: flex-start; padding: 12px 16px; }
   .top-actions { flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
@@ -263,4 +316,11 @@ tbody tr:last-child td { border-bottom: 0; }
   .row-actions { width: 142px; grid-template-columns: repeat(2, minmax(60px, 1fr)); gap: 4px; }
   .seat-map { padding: 14px 8px; }
   .seat { width: 29px; height: 29px; }
+  .movie-showtime { grid-template-columns: 1fr; gap: 18px; padding: 16px; }
+  .movie-poster, .movie-poster img, .movie-poster-placeholder { min-height: 260px; }
+  .movie-poster { max-width: 240px; }
+  .showtime-option { min-width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); }
+  .sales-chart { padding: 17px; }
+  .sales-chart-heading { align-items: flex-start; flex-direction: column; }
+  .sales-chart-row { grid-template-columns: 1fr; gap: 8px; }
 }

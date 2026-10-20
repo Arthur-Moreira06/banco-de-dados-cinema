@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,8 +58,9 @@ public class OperacaoFuncionarioController {
     @GetMapping("/vendas-ingressos")
     public String formularioIngressos(@RequestParam(required=false) Integer sessaoId, Model model, HttpSession session) {
         model.addAttribute("usuario", session.getAttribute("usuario"));
-        model.addAttribute("sessoes", jdbc.queryForList("SELECT s.id_sessao AS id,CONCAT(f.titulo_original,' — ',s.data_sessao,' ',s.horario_inicio,' — Sala ',sa.numero) AS rotulo FROM sessao s JOIN filme f ON f.id_filme=s.id_filme JOIN sala sa ON sa.id_sala=s.id_sala ORDER BY s.data_sessao,s.horario_inicio"));
+        model.addAttribute("filmesProgramacao", agruparProgramacao(consultas.filmesComSessoes()));
         model.addAttribute("sessaoSelecionada", sessaoId);
+        model.addAttribute("detalhesSessao", sessaoId == null ? null : consultas.detalhesSessao(sessaoId));
         List<Map<String,Object>> assentos = new ArrayList<>();
         Map<String,List<Map<String,Object>>> fileiras = new LinkedHashMap<>();
         if (sessaoId != null) {
@@ -111,17 +113,56 @@ public class OperacaoFuncionarioController {
         LocalDate hoje = LocalDate.now();
         if (inicio == null || inicio.isBlank()) inicio = hoje.withDayOfMonth(1).toString();
         if (fim == null || fim.isBlank()) fim = hoje.withDayOfMonth(hoje.lengthOfMonth()).toString();
+        String erroConsulta = null;
+        try {
+            LocalDate dataInicio = LocalDate.parse(inicio);
+            LocalDate dataFim = LocalDate.parse(fim);
+            if (dataInicio.isAfter(dataFim)) throw new DateTimeParseException("Período inválido", inicio, 0);
+        } catch (DateTimeParseException ex) {
+            inicio = hoje.withDayOfMonth(1).toString();
+            fim = hoje.withDayOfMonth(hoje.lengthOfMonth()).toString();
+            erroConsulta = "Informe um período válido, com a data inicial anterior à final.";
+        }
+        if (!List.of("sessoes", "produtos", "relatorio", "geral").contains(tipo)) {
+            tipo = "sessoes";
+            erroConsulta = "O tipo de consulta informado é inválido.";
+        }
+        if (!filme.isBlank()) {
+            try {
+                Integer.parseInt(filme);
+            } catch (NumberFormatException ex) {
+                filme = "";
+                erroConsulta = "O filtro de filme informado é inválido.";
+            }
+        }
+        if (!List.of("Todas", "Pipoca", "Bebida", "Doce", "Combo", "Outro").contains(categoria)) {
+            categoria = "Todas";
+            erroConsulta = "A categoria informada é inválida.";
+        }
         model.addAttribute("usuario", session.getAttribute("usuario"));
         model.addAttribute("tipo", tipo);
         model.addAttribute("inicio", inicio);
         model.addAttribute("fim", fim);
         model.addAttribute("filmeSelecionado", filme);
         model.addAttribute("categoriaSelecionada", categoria);
+        model.addAttribute("erroConsulta", erroConsulta);
         model.addAttribute("filmes", consultas.filmes());
         model.addAttribute("categorias", List.of("Todas", "Pipoca", "Bebida", "Doce", "Combo", "Outro"));
         List<Map<String,Object>> linhas;
         List<String> colunas;
-        if (tipo.equals("produtos")) {
+        List<Map<String,Object>> grafico = List.of();
+        if (erroConsulta != null) {
+            linhas = List.of();
+            colunas = tipo.equals("produtos")
+                    ? List.of("id", "nome", "categoria", "unidades", "faturamento")
+                    : tipo.equals("sessoes")
+                    ? List.of("id", "data", "horario", "filme", "ingressos", "receita")
+                    : List.of();
+        } else if (tipo.equals("geral")) {
+            linhas = List.of();
+            colunas = List.of();
+            grafico = prepararGrafico(consultas.graficoVendasGerais(inicio, fim));
+        } else if (tipo.equals("produtos")) {
             linhas = consultas.produtos(inicio, fim, categoria);
             colunas = List.of("id", "nome", "categoria", "unidades", "faturamento");
         } else if (tipo.equals("relatorio")) {
@@ -135,7 +176,59 @@ public class OperacaoFuncionarioController {
         model.addAttribute("tipo", tipo);
         model.addAttribute("linhas", linhas);
         model.addAttribute("colunas", colunas);
+        model.addAttribute("grafico", grafico);
         return "consultas";
+    }
+
+    private static List<Map<String,Object>> prepararGrafico(List<Map<String,Object>> resultados) {
+        double maiorFaturamento = resultados.stream()
+                .mapToDouble(linha -> ((Number) linha.get("faturamento")).doubleValue())
+                .max().orElse(0);
+        List<Map<String,Object>> itens = new ArrayList<>();
+        for (Map<String,Object> linha : resultados) {
+            Map<String,Object> item = new LinkedHashMap<>();
+            item.put("tipo", linha.get("tipo"));
+            item.put("nome", linha.get("nome"));
+            item.put("unidades", linha.get("unidades"));
+            item.put("faturamento", linha.get("faturamento"));
+            double faturamento = ((Number) linha.get("faturamento")).doubleValue();
+            item.put("percentual", maiorFaturamento == 0 ? 0 : Math.max(4, Math.round(faturamento * 100.0 / maiorFaturamento)));
+            itens.add(item);
+        }
+        return itens;
+    }
+
+    private static List<Map<String,Object>> agruparProgramacao(List<Map<String,Object>> linhas) {
+        Map<Object,Map<String,Object>> filmes = new LinkedHashMap<>();
+        for (Map<String,Object> linha : linhas) {
+            Object id = linha.get("id");
+            Map<String,Object> filme = filmes.computeIfAbsent(id, chave -> {
+                Map<String,Object> novo = new LinkedHashMap<>();
+                novo.put("id", id);
+                novo.put("titulo", linha.get("titulo"));
+                novo.put("sinopse", linha.get("sinopse"));
+                novo.put("genero", linha.get("genero"));
+                novo.put("classificacao", linha.get("classificacao"));
+                novo.put("data_estreia", linha.get("data_estreia"));
+                novo.put("capa", linha.get("capa"));
+                novo.put("sessoes", new ArrayList<Map<String,Object>>());
+                return novo;
+            });
+            if (linha.get("sessao_id") != null) {
+                Map<String,Object> sessao = new LinkedHashMap<>();
+                sessao.put("id", linha.get("sessao_id"));
+                sessao.put("data", linha.get("data"));
+                sessao.put("horario", linha.get("horario"));
+                sessao.put("idioma", linha.get("idioma"));
+                sessao.put("tipo", linha.get("tipo"));
+                sessao.put("sala", linha.get("sala"));
+                sessao.put("preco", linha.get("preco"));
+                @SuppressWarnings("unchecked")
+                List<Map<String,Object>> sessoes = (List<Map<String,Object>>) filme.get("sessoes");
+                sessoes.add(sessao);
+            }
+        }
+        return new ArrayList<>(filmes.values());
     }
 
     private static String mensagem(Exception e) {
