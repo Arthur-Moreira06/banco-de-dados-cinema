@@ -45,8 +45,7 @@ public class CadastrosController {
         CadastroDefinicao d = catalogo.obter(tipo);
         model.addAttribute("usuario", session.getAttribute("usuario"));
         model.addAttribute("cadastro", d);
-        model.addAttribute("valores", vazios(d));
-        model.addAttribute("erro", null);
+        if (!model.containsAttribute("valores")) model.addAttribute("valores", vazios(d));
         return "cadastro-formulario";
     }
 
@@ -56,8 +55,7 @@ public class CadastrosController {
         model.addAttribute("usuario", session.getAttribute("usuario"));
         model.addAttribute("cadastro", d);
         model.addAttribute("id", id);
-        model.addAttribute("valores", repository.valoresFormulario(d, id));
-        model.addAttribute("erro", null);
+        if (!model.containsAttribute("valores")) model.addAttribute("valores", repository.valoresFormulario(d, id));
         return "cadastro-formulario";
     }
 
@@ -70,6 +68,9 @@ public class CadastrosController {
             flash.addFlashAttribute("sucesso", id == null ? "Cadastro realizado." : "Alterações salvas.");
         } catch (Exception ex) {
             flash.addFlashAttribute("erro", mensagem(ex));
+            Map<String, String> valoresDoFormulario = new LinkedHashMap<>(valores);
+            valoresDoFormulario.remove("senha");
+            flash.addFlashAttribute("valores", valoresDoFormulario);
             return id == null ? "redirect:/gerente/cadastros/" + tipo + "/novo"
                     : "redirect:/gerente/cadastros/" + tipo + "/" + id + "/editar";
         }

@@ -14,6 +14,7 @@ import java.sql.Time;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Repository
 public class CadastroRepository {
@@ -36,10 +37,15 @@ public class CadastroRepository {
 
     @Transactional
     public void salvar(CadastroDefinicao d, Integer id, Map<String, String> valores) {
-        if (d.tipo().equals("funcionarios")) { salvarFuncionario(d, id, valores); return; }
-        if (d.tipo().equals("sessoes")) { salvarSessao(id, valores); return; }
+        Map<String, String> dados = new LinkedHashMap<>(valores);
+        if (dados.containsKey("CPF")) dados.put("CPF", somenteDigitos(dados.get("CPF")));
+        if (dados.containsKey("telefone")) dados.put("telefone", blankNull(dados.get("telefone")));
+        if (dados.containsKey("email")) dados.put("email", dados.get("email") == null ? null : dados.get("email").trim());
+        validarUnicidade(d, id, dados);
+        if (d.tipo().equals("funcionarios")) { salvarFuncionario(d, id, dados); return; }
+        if (d.tipo().equals("sessoes")) { salvarSessao(id, dados); return; }
         List<String> colunas = d.colunas();
-        Object[] args = colunas.stream().map(col -> converter(d, col, valores.get(col))).toArray();
+        Object[] args = colunas.stream().map(col -> converter(d, col, dados.get(col))).toArray();
         if (id == null) {
             String nomes = String.join(",", colunas);
             String pontos = String.join(",", java.util.Collections.nCopies(colunas.size(), "?"));
@@ -50,6 +56,53 @@ public class CadastroRepository {
             comId[args.length] = id;
             jdbc.update("UPDATE " + d.tabela() + " SET " + sets + " WHERE " + d.colunaId() + "=?", comId);
         }
+    }
+
+    private void validarUnicidade(CadastroDefinicao d, Integer id, Map<String, String> valores) {
+        if (!d.tipo().equals("clientes") && !d.tipo().equals("funcionarios")) return;
+
+        String cpf = valores.get("CPF");
+        if (cpf != null && !cpf.isBlank()) {
+            boolean cpfEmCliente = existe("cliente", "id_cliente", "CPF", cpf,
+                    d.tipo().equals("clientes") ? id : null);
+            boolean cpfEmFuncionario = existe("funcionario", "id_funcionario", "CPF", cpf,
+                    d.tipo().equals("funcionarios") ? id : null);
+            if (cpfEmCliente || cpfEmFuncionario) {
+                String titular = cpfEmCliente && cpfEmFuncionario ? "um cliente e um funcionário"
+                        : cpfEmCliente ? "um cliente" : "um funcionário";
+                throw new IllegalArgumentException("Este CPF já está cadastrado para " + titular + ".");
+            }
+            if (cpf.length() != 11) throw new IllegalArgumentException("O CPF deve conter 11 dígitos.");
+        }
+
+        if (!d.tipo().equals("clientes")) return;
+        String email = valores.get("email");
+        if (email != null && !email.isBlank()
+                && existe("cliente", "id_cliente", "LOWER(email)", email.toLowerCase(java.util.Locale.ROOT), id)) {
+            throw new IllegalArgumentException("Este e-mail já está cadastrado para outro cliente.");
+        }
+
+        String telefone = somenteDigitos(valores.get("telefone"));
+        if (!telefone.isBlank()) {
+            String sql = "SELECT telefone FROM cliente WHERE telefone IS NOT NULL" + (id == null ? "" : " AND id_cliente<>?");
+            List<String> telefones = id == null ? jdbc.queryForList(sql, String.class)
+                    : jdbc.queryForList(sql, String.class, id);
+            if (telefones.stream().filter(Objects::nonNull).anyMatch(cadastrado -> somenteDigitos(cadastrado).equals(telefone))) {
+                throw new IllegalArgumentException("Este telefone já está cadastrado para outro cliente.");
+            }
+        }
+    }
+
+    private boolean existe(String tabela, String colunaId, String coluna, String valor, Integer idIgnorado) {
+        String sql = "SELECT COUNT(*) FROM " + tabela + " WHERE " + coluna + "=?" + (idIgnorado == null ? "" : " AND " + colunaId + "<>?");
+        Integer quantidade = idIgnorado == null
+                ? jdbc.queryForObject(sql, Integer.class, valor)
+                : jdbc.queryForObject(sql, Integer.class, valor, idIgnorado);
+        return quantidade != null && quantidade > 0;
+    }
+
+    private static String somenteDigitos(String valor) {
+        return valor == null ? "" : valor.replaceAll("\\D", "");
     }
 
     private void salvarFuncionario(CadastroDefinicao d, Integer id, Map<String, String> v) {

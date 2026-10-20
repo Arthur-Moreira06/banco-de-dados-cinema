@@ -21,7 +21,8 @@ public class PerfilController {
         model.addAttribute("usuario", usuario);
         model.addAttribute("dados", jdbc.queryForMap("""
                 SELECT id_funcionario AS id, nome, CPF AS cpf, telefone, cargo, login,
-                       perfil_acesso AS perfil, data_admissao AS admissao, ativo
+                       perfil_acesso AS perfil, data_admissao AS admissao,
+                       CASE WHEN ativo = 1 THEN 'Ativo' ELSE 'Inativo' END AS situacao
                 FROM funcionario
                 WHERE id_funcionario=?
                 """, usuario.id()));

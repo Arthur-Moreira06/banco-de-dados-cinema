@@ -21,7 +21,7 @@
         <div><dt>CPF</dt><dd th:text="${dados['cpf']}">CPF</dd></div>
         <div><dt>Telefone</dt><dd th:text="${dados['telefone'] != null ? dados['telefone'] : 'Não informado'}">Telefone</dd></div>
         <div><dt>Data de admissão</dt><dd th:text="${dados['admissao']}">Data</dd></div>
-        <div><dt>Situação</dt><dd th:text="${dados['ativo'] == 1 ? 'Ativo' : 'Inativo'}">Ativo</dd></div>
+        <div><dt>Situação</dt><dd th:text="${dados['situacao']}">Ativo</dd></div>
       </dl>
     </section>
   </main>

@@ -47,8 +47,8 @@ public class VendaAplicacaoService {
         Integer assentoValido = jdbc.queryForObject("SELECT COUNT(*) FROM assento WHERE id_assento=? AND id_sala=?", Integer.class, assentoId, salaId);
         if (assentoValido == null || assentoValido == 0) throw new IllegalArgumentException("O assento não pertence à sala dessa sessão.");
         if (documentoId != null) {
-            Integer documentoValido = jdbc.queryForObject("SELECT COUNT(*) FROM documento_meia_entrada WHERE id_documento=? AND id_cliente=? AND (validade IS NULL OR validade>=CURDATE())", Integer.class, documentoId, clienteId);
-            if (documentoValido == null || documentoValido == 0) throw new IllegalArgumentException("Documento inválido, vencido ou de outro cliente.");
+            Integer documentoValido = jdbc.queryForObject("SELECT COUNT(*) FROM documento_meia_entrada d JOIN cliente c ON c.id_cliente=d.id_cliente WHERE d.id_documento=? AND d.id_cliente=? AND (d.validade IS NULL OR d.validade>=CURDATE()) AND (d.tipo_documento<>'Idoso' OR c.data_nascimento<=DATE_SUB(CURDATE(),INTERVAL 60 YEAR))", Integer.class, documentoId, clienteId);
+            if (documentoValido == null || documentoValido == 0) throw new IllegalArgumentException("Documento inválido, vencido, de outro cliente ou sem critério para meia-entrada.");
         }
         BigDecimal valor = tipo.equals("Meia-entrada") ? base.divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP) : base;
         int ingressoId = inserirId("INSERT INTO ingresso(id_sessao,id_assento,id_cliente,id_documento,tipo,preco_pago) VALUES(?,?,?,?,?,?)",
