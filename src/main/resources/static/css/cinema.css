@@ -134,14 +134,20 @@ a { color: var(--accent); }
 .user-dropdown form { margin: 0; }
 .dropdown-logout { font-weight: inherit; }
 
-/* Theme control styled as a real on/off slider. */
-.theme-switch { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 34px; padding: 4px; background: transparent; border: 0; cursor: pointer; }
+/* Theme switch lives with account preferences and uses an icon in its thumb. */
+.theme-switch { display: inline-flex; align-items: center; justify-content: center; width: 58px; height: 38px; padding: 4px; background: transparent; border: 0; cursor: pointer; }
 .topbar .theme-switch { padding: 4px; background: transparent; border: 0; border-radius: 9px; }
 .theme-switch:hover { background: var(--subtle); }
-.theme-switch-track { position: relative; display: inline-flex; align-items: center; width: 43px; height: 24px; padding: 3px; background: #7c8290; border-radius: 20px; transition: background .2s; }
+.theme-switch-track { position: relative; display: inline-flex; align-items: center; width: 50px; height: 28px; padding: 3px; background: #7c8290; border-radius: 20px; transition: background .2s; }
 .theme-switch[aria-checked="true"] .theme-switch-track { background: var(--accent); }
-.theme-switch-thumb { display: grid; place-items: center; width: 18px; height: 18px; background: #fff; border-radius: 50%; box-shadow: 0 1px 4px #0004; transition: transform .2s; }
-.theme-switch[aria-checked="true"] .theme-switch-thumb { transform: translateX(19px); }
+.theme-switch-thumb { display: grid; place-items: center; width: 22px; height: 22px; overflow: hidden; background: #fff; border-radius: 50%; box-shadow: 0 1px 4px #0004; font-size: 13px; line-height: 1; transition: transform .2s; }
+.theme-switch-thumb::before { content: "☀️"; }
+.theme-switch[aria-checked="true"] .theme-switch-thumb::before { content: "🌙"; }
+.theme-switch[aria-checked="true"] .theme-switch-thumb { transform: translateX(22px); }
+.dropdown-preference { display: grid; min-height: 52px; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 4px 12px 4px 0; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; line-height: 1; }
+.dropdown-preference > span { display: flex; align-items: center; min-height: 44px; justify-self: start; padding: 12px; }
+.dropdown-preference .theme-switch { justify-self: end; margin: 0; }
+.dropdown-preference .theme-switch:hover { background: transparent; }
 .login-theme-toggle { position: fixed; top: 20px; right: 24px; }
 
 .container { max-width: 1120px; margin: 48px auto; padding: 0 24px; }

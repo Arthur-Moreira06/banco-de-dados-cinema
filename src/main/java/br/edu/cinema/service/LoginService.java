@@ -14,6 +14,6 @@ public class LoginService {
 
     public UsuarioAutenticado autenticar(String login, String senha) {
         return funcionarios.autenticar(login, senha)
-                .orElseThrow(() -> new IllegalArgumentException("Login ou senha inválidos."));
+                .orElseThrow(() -> new IllegalArgumentException("Nome de usuário e/ou senha incorretos."));
     }
 }

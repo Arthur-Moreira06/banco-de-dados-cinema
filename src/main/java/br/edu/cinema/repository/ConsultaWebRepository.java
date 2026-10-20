@@ -18,15 +18,20 @@ public class ConsultaWebRepository {
         Date dataFinal = Date.valueOf(LocalDate.parse(fim));
         return jdbc.queryForList("""
                 SELECT s.id_sessao AS id, s.data_sessao AS data, s.horario_inicio AS horario,
-                       f.titulo_original AS filme, COUNT(DISTINCT i.id_ingresso) AS ingressos,
+                       f.titulo_original AS filme, COUNT(i.id_ingresso) AS ingressos,
                        COALESCE(SUM(i.preco_pago),0) AS receita
-                FROM pagamento pg
-                JOIN venda v ON v.id_venda=pg.id_venda
-                JOIN venda_ingresso vi ON vi.id_venda=v.id_venda
-                JOIN ingresso i ON i.id_ingresso=vi.id_ingresso
+                FROM ingresso i
                 JOIN sessao s ON s.id_sessao=i.id_sessao
                 JOIN filme f ON f.id_filme=s.id_filme
-                WHERE DATE(pg.data_pagamento) BETWEEN ? AND ? AND (?='' OR s.id_filme=?)
+                WHERE DATE(i.data_compra) BETWEEN ? AND ?
+                  AND (?='' OR s.id_filme=?)
+                  AND COALESCE((
+                      SELECT h.status
+                      FROM ingresso_status_historico h
+                      WHERE h.id_ingresso=i.id_ingresso
+                      ORDER BY h.data_hora DESC,h.id_status_hist DESC
+                      LIMIT 1
+                  ), 'Reservado') IN ('Pago','Utilizado')
                 GROUP BY s.id_sessao,s.data_sessao,s.horario_inicio,f.titulo_original
                 ORDER BY s.data_sessao,s.horario_inicio
                 """, dataInicial, dataFinal, filme, filme.isBlank() ? null : Integer.valueOf(filme));
