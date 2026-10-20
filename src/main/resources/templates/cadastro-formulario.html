@@ -20,7 +20,7 @@
       <form class="data-form" method="post" th:action="@{/gerente/cadastros/{tipo}/salvar(tipo=${cadastro.tipo()})}">
         <input type="hidden" name="id" th:if="${id != null}" th:value="${id}">
         <div class="field" th:each="campo : ${cadastro.campos()}">
-          <label th:for="${campo.nome()}" th:text="${campo.rotulo()}">Campo</label>
+          <label th:for="${campo.nome()}"><span th:text="${campo.rotulo()}">Campo</span><span class="optional-label" th:if="${campo.nome() == 'telefone'}">(opcional)</span></label>
           <select th:if="${campo.tipo() == 'select'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:required="${campo.obrigatorio()}">
             <option value="" th:if="${!campo.obrigatorio()}" selected>— Selecione —</option>
             <option th:each="opcao : ${campo.opcoes()}" th:value="${opcao}" th:text="${opcao}" th:selected="${valores[campo.nome()] == opcao}"></option>

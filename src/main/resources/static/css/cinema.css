@@ -64,6 +64,7 @@ a { color: var(--accent); }
 .login-card p, .container > p, .page-heading p, .form-card > p { color: var(--muted); margin: 0 0 26px; }
 .login-card form { display: grid; gap: 10px; }
 .login-card label, .field label { margin-top: 8px; font-size: 14px; font-weight: 650; }
+.optional-label { margin-left: 6px; color: var(--muted); font-size: 12px; font-weight: 400; }
 .login-card input, .field input, .field select, .field textarea, .filter-bar input, .filter-bar select {
   width: 100%;
   padding: 11px 12px;
