@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meu perfil | Cinema</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <script defer th:src="@{/js/tema.js}"></script>
+</head>
+<body>
+  <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
+  <main class="container profile-container">
+    <a class="back-link" th:href="@{/}">← Voltar à área de trabalho</a>
+    <section class="profile-card">
+      <div class="profile-heading">
+        <span class="user-avatar user-avatar-large" aria-hidden="true" th:text="${usuario.iniciais()}">AG</span>
+        <div><span class="eyebrow">MINHA CONTA</span><h1 th:text="${dados['nome']}">Nome</h1><p th:text="|${dados['cargo']} · ${dados['perfil']}|">Cargo · Perfil</p></div>
+      </div>
+      <dl class="profile-details">
+        <div><dt>Login</dt><dd th:text="${dados['login']}">login</dd></div>
+        <div><dt>CPF</dt><dd th:text="${dados['cpf']}">CPF</dd></div>
+        <div><dt>Telefone</dt><dd th:text="${dados['telefone'] != null ? dados['telefone'] : 'Não informado'}">Telefone</dd></div>
+        <div><dt>Data de admissão</dt><dd th:text="${dados['admissao']}">Data</dd></div>
+        <div><dt>Situação</dt><dd th:text="${dados['ativo'] == 1 ? 'Ativo' : 'Inativo'}">Ativo</dd></div>
+      </dl>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consultas | Cinema</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <script defer th:src="@{/js/tema.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
+<main class="container">
+  <a class="back-link" href="/funcionario">← Voltar à área do funcionário</a>
+  <div class="page-heading"><div><span class="eyebrow">CONSULTAS</span><h1>Relatórios e consultas</h1></div></div>
+  <nav class="tabs">
+    <a th:classappend="${tipo == 'sessoes' ? 'active' : ''}" th:href="@{/funcionario/consultas(tipo='sessoes')}">Ingressos vendidos</a>
+    <a th:classappend="${tipo == 'produtos' ? 'active' : ''}" th:href="@{/funcionario/consultas(tipo='produtos')}">Produtos vendidos</a>
+    <a th:classappend="${tipo == 'relatorio' ? 'active' : ''}" th:href="@{/funcionario/consultas(tipo='relatorio')}">Ocupação e receita</a>
+    <a th:classappend="${tipo == 'geral' ? 'active' : ''}" th:href="@{/funcionario/consultas(tipo='geral')}">Vendas gerais</a>
+  </nav>
+  <form class="filter-bar" method="get" action="/funcionario/consultas">
+    <input type="hidden" name="tipo" th:value="${tipo}">
+    <label>De <input type="date" name="inicio" th:value="${inicio}"></label>
+    <label>Até <input type="date" name="fim" th:value="${fim}"></label>
+    <label th:if="${tipo == 'sessoes'}">Filme <select name="filme"><option value="">Todos</option><option th:each="f : ${filmes}" th:value="${f.id}" th:text="${f.titulo}" th:selected="${filmeSelecionado == f.id.toString()}"></option></select></label>
+    <label th:if="${tipo == 'produtos'}">Categoria <select name="categoria"><option th:each="cat : ${categorias}" th:value="${cat}" th:text="${cat}" th:selected="${categoriaSelecionada == cat}"></option></select></label>
+    <button class="primary-button" type="submit">Consultar</button>
+  </form>
+  <div class="alert" role="alert" th:if="${erroConsulta != null}" th:text="${erroConsulta}"></div>
+  <p class="report-hint" th:if="${tipo == 'produtos' or tipo == 'sessoes'}">O período considera a data da venda.</p>
+
+  <section class="sales-chart" th:if="${tipo == 'geral'}" aria-label="Gráfico geral de vendas">
+    <div class="sales-chart-heading"><div><span class="eyebrow">VISUALIZAÇÃO GERAL</span><h2>Vendas de ingressos e produtos</h2><p>Comparação por faturamento no período selecionado.</p></div><span class="chart-period" th:text="|${#temporals.format(T(java.time.LocalDate).parse(inicio), 'dd/MM/yyyy')} — ${#temporals.format(T(java.time.LocalDate).parse(fim), 'dd/MM/yyyy')}|">Período consultado</span></div>
+    <div class="sales-chart-list" th:if="${!#lists.isEmpty(grafico)}">
+      <div class="sales-chart-row" th:each="item : ${grafico}">
+        <div class="sales-chart-label"><span class="sales-kind" th:text="${item.tipo}">Tipo da venda</span><strong th:text="${item.nome}">Nome</strong><span th:text="|${item.unidades} unidades · ${#numbers.formatCurrency(item.faturamento)}|">0 unidades · R$ 0,00</span></div>
+        <div class="sales-bar-track" role="img" th:aria-label="|${item.tipo} ${item.nome}: ${#numbers.formatCurrency(item.faturamento)} de faturamento|"><span class="sales-bar-fill" th:style="|--bar-width: ${item.percentual}%|"></span></div>
+      </div>
+    </div>
+    <p class="chart-empty" th:if="${#lists.isEmpty(grafico)}">Não há vendas de ingressos ou produtos neste período.</p>
+  </section>
+
+  <div class="table-wrap" th:if="${tipo != 'geral'}">
+    <table><thead><tr><th th:each="coluna : ${colunas}" th:text="${coluna}">Coluna</th></tr></thead>
+      <tbody>
+        <tr th:if="${#lists.isEmpty(linhas)}"><td class="empty" th:colspan="${#lists.size(colunas)}" th:text="${tipo == 'produtos' ? 'Nenhum produto foi vendido nesse período.' : (tipo == 'sessoes' ? 'Nenhum ingresso foi vendido nesse período.' : 'Nenhum resultado nesse período.')}">Nenhum resultado nesse período.</td></tr>
+        <tr th:each="linha : ${linhas}"><td th:each="coluna : ${colunas}" th:text="${linha.get(#vars.coluna)}">valor</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>
