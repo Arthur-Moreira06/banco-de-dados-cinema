@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="topbar" th:fragment="cabecalho">
+  <a class="brand" th:href="@{/}">CINEMA</a>
+  <nav class="top-actions" aria-label="Conta e aparência">
+    <button class="theme-switch" type="button" data-theme-toggle role="switch" aria-checked="false" aria-label="Alternar tema">
+      <span class="theme-switch-track" aria-hidden="true"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu" data-user-menu>
+      <button class="user-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-haspopup="true">
+        <span class="user-avatar" aria-hidden="true" th:text="${usuario.iniciais()}">AG</span>
+        <span class="user-trigger-info"><strong th:text="${usuario.nome()}">Nome do usuário</strong><small th:text="${usuario.cargo()}">Cargo</small></span>
+        <span class="user-chevron" aria-hidden="true">⌄</span>
+      </button>
+      <section class="user-dropdown" data-user-dropdown hidden aria-label="Menu do usuário">
+        <div class="dropdown-profile">
+          <span class="user-avatar user-avatar-large" aria-hidden="true" th:text="${usuario.iniciais()}">AG</span>
+          <span><strong th:text="${usuario.nome()}">Nome do usuário</strong><small th:text="|${usuario.cargo()} · ${usuario.perfil()}|">Cargo · Perfil</small></span>
+        </div>
+        <a class="dropdown-link" th:href="@{/perfil}">Informações pessoais</a>
+        <form method="post" th:action="@{/sair}"><button class="dropdown-link dropdown-logout" type="submit">Sair da conta</button></form>
+      </section>
+    </div>
+  </nav>
+  <script defer th:src="@{/js/menu-usuario.js}"></script>
+</header>
+</body>
+</html>

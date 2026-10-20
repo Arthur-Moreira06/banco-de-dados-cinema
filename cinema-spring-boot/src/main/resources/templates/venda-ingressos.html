@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Venda de ingressos | Cinema</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <script defer th:src="@{/js/tema.js}"></script>
+  <script defer th:src="@{/js/assentos.js}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
+<main class="container form-container">
+  <a class="back-link" href="/funcionario">← Voltar à área do funcionário</a>
+  <div class="form-card ticket-card">
+    <span class="eyebrow">BILHETERIA</span>
+    <h1>Vender ingressos</h1>
+    <p>Escolha uma sessão para ver os assentos livres e ocupados.</p>
+    <div class="alert" th:if="${erro}" th:text="${erro}"></div>
+    <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
+
+    <form class="session-picker" method="get" action="/funcionario/vendas-ingressos">
+      <label for="sessaoId">Sessão</label>
+      <select id="sessaoId" name="sessaoId" required onchange="this.form.submit()">
+        <option value="">Selecione uma sessão</option>
+        <option th:each="s : ${sessoes}" th:value="${s.id}" th:text="|ID ${s.id} — ${s.rotulo}|" th:selected="${sessaoSelecionada != null and sessaoSelecionada == s.id}"></option>
+      </select>
+    </form>
+
+    <section class="seat-map" th:if="${sessaoSelecionada != null}" aria-label="Mapa de assentos">
+      <h2>Escolha seu assento</h2>
+      <div class="screen" aria-label="Tela">TELA</div>
+      <div class="seat-legend">
+        <span><i class="seat-dot seat-dot-free"></i> Livre</span>
+        <span><i class="seat-dot seat-dot-occupied"></i> Ocupado</span>
+        <span><i class="seat-dot seat-dot-selected"></i> Selecionado</span>
+      </div>
+      <div class="seat-row" th:each="fileira : ${fileiras}">
+        <span class="row-label" th:text="${fileira.key}">A</span>
+        <div class="seat-row-items">
+          <button th:each="a : ${fileira.value}" type="button"
+                  th:class="${a.ocupado ? 'seat occupied' : 'seat available'}"
+                  th:disabled="${a.ocupado}"
+                  th:attr="data-seat-id=${a.id},data-seat-label=|${a.fileira}-${a.numero}|,aria-label=|Fileira ${a.fileira}, assento ${a.numero}, ${a.ocupado ? 'ocupado' : 'livre'}|,title=|${a.tipo} — ${a.ocupado ? 'Ocupado' : 'Livre'}|"
+                  th:text="${a.numero}">1</button>
+        </div>
+      </div>
+    </section>
+
+    <form class="data-form ticket-form" method="post" th:action="@{/funcionario/vendas-ingressos}" th:if="${sessaoSelecionada != null}" data-seat-form>
+      <input type="hidden" name="sessaoId" th:value="${sessaoSelecionada}">
+      <input type="hidden" id="assentoId" name="assentoId" required>
+      <p class="seat-selection" data-seat-selection>Selecione um assento livre no mapa.</p>
+      <div class="field"><label for="clienteId">Cliente</label><select id="clienteId" name="clienteId" required><option value="">Selecione um cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select></div>
+      <div class="field"><label for="tipo">Tipo de ingresso</label><select id="tipo" name="tipo" required><option value="Inteira">Inteira</option><option value="Meia-entrada">Meia-entrada</option></select></div>
+      <div class="field"><label for="documentoId">Documento de meia-entrada</label><select id="documentoId" name="documentoId"><option value="">Sem documento</option><option th:each="d : ${documentos}" th:value="${d.id}" th:text="${d.rotulo}"></option></select><small>Obrigatório quando o tipo for meia-entrada.</small></div>
+      <div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div>
+      <div class="form-actions"><a class="secondary-button" href="/funcionario">Cancelar</a><button class="primary-button" type="submit" data-submit-seat disabled>Registrar ingresso</button></div>
+    </form>
+    <p class="seat-empty" th:if="${sessaoSelecionada != null and #lists.isEmpty(assentos)}">Esta sessão não possui assentos cadastrados.</p>
+  </div>
+</main>
+</body>
+</html>
