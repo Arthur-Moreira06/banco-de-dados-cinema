@@ -110,7 +110,37 @@ public class ConsultaWebRepository {
     }
 
     public List<Map<String,Object>> relatorio() {
-        return jdbc.queryForList("SELECT * FROM vw_relatorio_sessao ORDER BY data_sessao,horario_inicio");
+        return jdbc.queryForList("""
+                WITH status_recente AS (
+                    SELECT h.id_ingresso, h.status,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY h.id_ingresso
+                               ORDER BY h.data_hora DESC, h.id_status_hist DESC
+                           ) AS ordem
+                    FROM ingresso_status_historico h
+                ), vendas_sessao AS (
+                    SELECT i.id_sessao,
+                           SUM(CASE WHEN COALESCE(sr.status, 'Reservado') <> 'Cancelado' THEN 1 ELSE 0 END) AS ingressos,
+                           SUM(CASE WHEN COALESCE(sr.status, 'Reservado') IN ('Pago', 'Utilizado') THEN i.preco_pago ELSE 0 END) AS receita
+                    FROM ingresso i
+                    LEFT JOIN status_recente sr
+                        ON sr.id_ingresso = i.id_ingresso AND sr.ordem = 1
+                    GROUP BY i.id_sessao
+                )
+                SELECT s.id_sessao AS id,
+                       s.data_sessao AS data,
+                       s.horario_inicio AS horario,
+                       f.titulo_original AS filme,
+                       sa.capacidade,
+                       COALESCE(vs.ingressos, 0) AS ingressos,
+                       ROUND(COALESCE(vs.ingressos, 0) * 100.0 / NULLIF(sa.capacidade, 0), 1) AS ocupacao_percentual,
+                       COALESCE(vs.receita, 0) AS receita
+                FROM sessao s
+                JOIN filme f ON f.id_filme = s.id_filme
+                JOIN sala sa ON sa.id_sala = s.id_sala
+                LEFT JOIN vendas_sessao vs ON vs.id_sessao = s.id_sessao
+                ORDER BY s.data_sessao, s.horario_inicio
+                """);
     }
     public List<Map<String,Object>> filmes() { return jdbc.queryForList("SELECT id_filme AS id,titulo_original AS titulo FROM filme ORDER BY titulo_original"); }
 }

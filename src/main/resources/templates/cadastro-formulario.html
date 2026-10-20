@@ -1,1 +1,52 @@
-<!doctype html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Formulário | Cinema</title><link rel="stylesheet" th:href="@{/css/cinema.css}"><script defer th:src="@{/js/tema.js}"></script></head><body><header th:replace="~{fragments/cabecalho :: cabecalho}"></header><main class="container form-container"><a class="back-link" th:href="@{/gerente/cadastros/{tipo}(tipo=${cadastro.tipo()})}">← Voltar a <span th:text="${cadastro.titulo()}">cadastros</span></a><div class="form-card"><span class="eyebrow">ÁREA GERENCIAL</span><h1 th:text="${id == null ? 'Novo cadastro' : 'Editar cadastro'}">Cadastro</h1><p th:text="${cadastro.titulo()}">Categoria</p><div class="alert" th:if="${erro}" th:text="${erro}"></div><form class="data-form" method="post" th:action="@{/gerente/cadastros/{tipo}/salvar(tipo=${cadastro.tipo()})}"><input type="hidden" name="id" th:if="${id != null}" th:value="${id}"><div class="field" th:each="campo : ${cadastro.campos()}"><label th:for="${campo.nome()}" th:text="${campo.rotulo()}">Campo</label><select th:if="${campo.tipo() == 'select'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:required="${campo.obrigatorio()}"><option value="" th:if="${!campo.obrigatorio()}" selected>— Selecione —</option><option th:each="opcao : ${campo.opcoes()}" th:value="${opcao}" th:text="${opcao}" th:selected="${valores[campo.nome()] == opcao}"></option></select><textarea th:if="${campo.tipo() == 'textarea'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:required="${campo.obrigatorio()}" th:text="${valores[campo.nome()]}"></textarea><input th:if="${campo.tipo() != 'select' and campo.tipo() != 'textarea'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:type="${campo.tipo()}" th:required="${campo.obrigatorio()}" th:value="${valores[campo.nome()]}" th:step="${campo.tipo() == 'decimal' ? '0.01' : null}" th:min="${campo.tipo() == 'number' or campo.tipo() == 'decimal' ? '0' : null}" autocomplete="off"></div><div class="form-actions"><a class="secondary-button" th:href="@{/gerente/cadastros/{tipo}(tipo=${cadastro.tipo()})}">Cancelar</a><button class="primary-button" type="submit">Salvar</button></div></form></div></main></body></html>
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formulário | Cinema</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <script defer th:src="@{/js/tema.js}"></script>
+  <script defer th:src="@{/js/mostrar-senha.js(v=4)}"></script>
+</head>
+<body>
+  <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
+  <main class="container form-container">
+    <a class="back-link" th:href="@{/gerente/cadastros/{tipo}(tipo=${cadastro.tipo()})}">← Voltar a <span th:text="${cadastro.titulo()}">cadastros</span></a>
+    <div class="form-card">
+      <span class="eyebrow">ÁREA GERENCIAL</span>
+      <h1 th:text="${id == null ? 'Novo cadastro' : 'Editar cadastro'}">Cadastro</h1>
+      <p th:text="${cadastro.titulo()}">Categoria</p>
+      <div class="alert" th:if="${erro}" th:text="${erro}"></div>
+      <form class="data-form" method="post" th:action="@{/gerente/cadastros/{tipo}/salvar(tipo=${cadastro.tipo()})}">
+        <input type="hidden" name="id" th:if="${id != null}" th:value="${id}">
+        <div class="field" th:each="campo : ${cadastro.campos()}">
+          <label th:for="${campo.nome()}" th:text="${campo.rotulo()}">Campo</label>
+          <select th:if="${campo.tipo() == 'select'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:required="${campo.obrigatorio()}">
+            <option value="" th:if="${!campo.obrigatorio()}" selected>— Selecione —</option>
+            <option th:each="opcao : ${campo.opcoes()}" th:value="${opcao}" th:text="${opcao}" th:selected="${valores[campo.nome()] == opcao}"></option>
+          </select>
+          <textarea th:if="${campo.tipo() == 'textarea'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:required="${campo.obrigatorio()}" th:text="${valores[campo.nome()]}"></textarea>
+          <div class="password-input-wrap" th:if="${campo.tipo() == 'password'}">
+            <input th:id="${campo.nome()}" th:name="${campo.nome()}" type="password" th:required="${campo.obrigatorio()}" th:value="${valores[campo.nome()]}" autocomplete="new-password">
+            <button class="password-visibility-toggle" type="button" data-password-toggle aria-label="Mostrar senha" aria-pressed="false">
+              <svg data-password-hidden-icon viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+                <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.4 3.3M6.2 6.2C3.9 7.6 2.7 9.6 2.5 12c.5 1.2 1.7 3 4 4.4A10.7 10.7 0 0 0 12 18c1.2 0 2.3-.2 3.3-.6"></path>
+              </svg>
+              <svg data-password-visible-icon viewBox="0 0 24 24" aria-hidden="true" focusable="false" hidden>
+                <path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <input th:if="${campo.tipo() != 'select' and campo.tipo() != 'textarea' and campo.tipo() != 'password'}" th:id="${campo.nome()}" th:name="${campo.nome()}" th:type="${campo.tipo()}" th:required="${campo.obrigatorio()}" th:value="${valores[campo.nome()]}" th:step="${campo.tipo() == 'decimal' ? '0.01' : null}" th:min="${campo.tipo() == 'number' or campo.tipo() == 'decimal' ? '0' : null}" autocomplete="off">
+        </div>
+        <div class="form-actions">
+          <a class="secondary-button" th:href="@{/gerente/cadastros/{tipo}(tipo=${cadastro.tipo()})}">Cancelar</a>
+          <button class="primary-button" type="submit">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

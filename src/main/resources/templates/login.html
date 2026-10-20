@@ -1,2 +1,43 @@
-<!doctype html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cinema | Entrar</title><link rel="stylesheet" th:href="@{/css/cinema.css}"><script defer th:src="@{/js/tema.js}"></script></head><body class="login-page"><button class="theme-switch login-theme-toggle" type="button" data-theme-toggle role="switch" aria-checked="false" aria-label="Alternar tema"><span class="theme-switch-track" aria-hidden="true"><span class="theme-switch-thumb"></span></span></button><main class="card login-card"><span class="eyebrow">SISTEMA DE CINEMA</span><h1>Entrar</h1><p>Use seu login de funcionário.</p><div class="alert" th:if="${mensagem}" th:text="${mensagem}"></div><div class="success" th:if="${param.logout}">Você saiu da conta.</div><form method="post" th:action="@{/login}" th:object="${formulario}"><label for="login">Login</label><input id="login" th:field="*{login}" autocomplete="username" required autofocus><label for="senha">Senha</label><input id="senha" type="password" th:field="*{senha}" autocomplete="current-password" required><button type="submit">Acessar</button></form></main></body></html>
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cinema | Entrar</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <script defer th:src="@{/js/tema.js}"></script>
+  <script defer th:src="@{/js/mostrar-senha.js(v=4)}"></script>
+</head>
+<body class="login-page">
+  <button class="theme-switch login-theme-toggle" type="button" data-theme-toggle role="switch" aria-checked="false" aria-label="Alternar tema">
+    <span class="theme-switch-track" aria-hidden="true"><span class="theme-switch-thumb"></span></span>
+  </button>
+  <main class="card login-card">
+    <span class="eyebrow">SISTEMA DE CINEMA</span>
+    <h1>Entrar</h1>
+    <p>Use seu login de funcionário.</p>
+    <div class="alert" th:if="${mensagem}" th:text="${mensagem}"></div>
+    <div class="success" th:if="${param.logout}">Você saiu da conta.</div>
+    <form method="post" th:action="@{/login}" th:object="${formulario}">
+      <label for="login">Login</label>
+      <input id="login" th:field="*{login}" autocomplete="username" required autofocus>
+      <label for="senha">Senha</label>
+      <div class="password-input-wrap">
+        <input id="senha" type="password" th:field="*{senha}" autocomplete="current-password" required>
+        <button class="password-visibility-toggle" type="button" data-password-toggle aria-label="Mostrar senha" aria-pressed="false">
+          <svg data-password-hidden-icon viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+            <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.4 3.3M6.2 6.2C3.9 7.6 2.7 9.6 2.5 12c.5 1.2 1.7 3 4 4.4A10.7 10.7 0 0 0 12 18c1.2 0 2.3-.2 3.3-.6"></path>
+          </svg>
+          <svg data-password-visible-icon viewBox="0 0 24 24" aria-hidden="true" focusable="false" hidden>
+            <path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+      <button type="submit">Acessar</button>
+    </form>
+  </main>
+</body>
+</html>
 
