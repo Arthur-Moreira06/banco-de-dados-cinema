@@ -26,10 +26,9 @@ public class CatalogoCadastros {
                 s("perfil_acesso", "Perfil de acesso", true, "Operacional", "Administrativo"),
                 c("data_admissao", "Admissão", "date", true), s("ativo", "Ativo", true, "1", "0"))));
         adicionar(new CadastroDefinicao("filmes", "Filmes", "filme", "id_filme",
-                "SELECT f.id_filme AS id, f.titulo_original AS titulo, f.data_estreia, f.duracao_minutos AS duracao, f.genero_principal AS genero, f.classificacao_indicativa AS classificacao, f.id_filme_relacionado AS relacionado, f.tipo_relacao AS relacao FROM filme f ORDER BY f.titulo_original",
-                List.of("titulo_original", "sinopse", "data_estreia", "url_capa", "duracao_minutos", "genero_principal", "classificacao_indicativa", "id_filme_relacionado", "tipo_relacao"), List.of(
+                "SELECT f.id_filme AS id, f.titulo_original AS titulo, f.duracao_minutos AS duracao, f.genero_principal AS genero, f.classificacao_indicativa AS classificacao, f.id_filme_relacionado AS relacionado, f.tipo_relacao AS relacao FROM filme f ORDER BY f.titulo_original",
+                List.of("titulo_original", "sinopse", "duracao_minutos", "genero_principal", "classificacao_indicativa", "id_filme_relacionado", "tipo_relacao"), List.of(
                 c("titulo_original", "Título", "text", true), c("sinopse", "Sinopse", "textarea", false),
-                c("data_estreia", "Data de estreia", "date", false), c("url_capa", "URL da capa do filme", "url", false),
                 c("duracao_minutos", "Duração (minutos)", "number", true), c("genero_principal", "Gênero", "text", true),
                 s("classificacao_indicativa", "Classificação", true, "L", "10", "12", "14", "16", "18"),
                 c("id_filme_relacionado", "ID do filme relacionado (opcional)", "number", false),

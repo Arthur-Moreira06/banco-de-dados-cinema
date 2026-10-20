@@ -9,8 +9,6 @@ CREATE TABLE filme (
     id_filme INT UNSIGNED AUTO_INCREMENT,
     titulo_original	VARCHAR(150) NOT NULL,
     sinopse	TEXT NULL,
-    data_estreia DATE NULL,
-    url_capa VARCHAR(500) NULL,
     duracao_minutos	SMALLINT UNSIGNED NOT NULL,
     genero_principal VARCHAR(40) NOT NULL,
     classificacao_indicativa ENUM('L','10','12','14','16','18') NOT NULL,

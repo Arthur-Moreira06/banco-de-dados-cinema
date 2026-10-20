@@ -20,8 +20,7 @@
   <section class="movie-showtime-list" aria-label="Filmes e horários disponíveis">
     <article class="movie-showtime" th:each="filme : ${filmesProgramacao}">
       <div class="movie-poster">
-        <img th:if="${filme.capa != null and !#strings.isEmpty(filme.capa)}" th:src="${filme.capa}" th:alt="|Capa de ${filme.titulo}|">
-        <div class="movie-poster-placeholder" th:if="${filme.capa == null or #strings.isEmpty(filme.capa)}">
+        <div class="movie-poster-placeholder">
           <span th:text="${filme.genero}">Cinema</span><strong th:text="${filme.titulo}">Filme</strong><small>CINEMA</small>
         </div>
       </div>
@@ -29,7 +28,6 @@
         <div class="movie-title-line"><span class="eyebrow" th:text="${filme.genero}">Gênero</span><span class="rating-badge" th:classappend="${filme.classificacao == 'L' ? 'rating-free' : (filme.classificacao == '10' ? 'rating-10' : (filme.classificacao == '12' ? 'rating-12' : (filme.classificacao == '14' ? 'rating-14' : (filme.classificacao == '16' ? 'rating-16' : 'rating-18'))))}" th:text="${filme.classificacao == 'L' ? 'Livre' : filme.classificacao + ' anos'}">Livre</span></div>
         <h2 th:text="${filme.titulo}">Título do filme</h2>
         <p class="movie-synopsis" th:text="${filme.sinopse != null and !#strings.isEmpty(filme.sinopse) ? filme.sinopse : 'Sinopse ainda não cadastrada.'}">Sinopse do filme.</p>
-        <p class="premiere-date"><strong>Estreia</strong><span th:if="${filme.data_estreia != null}" th:text="${#dates.format(filme.data_estreia, 'dd/MM/yyyy')}">20/10/2026</span><span th:if="${filme.data_estreia == null}">Data não informada</span></p>
         <div class="showtimes-heading"><h3>Horários</h3><span th:text="|${#lists.size(filme.sessoes)} sessões|">0 sessões</span></div>
         <div class="showtime-list" th:if="${!#lists.isEmpty(filme.sessoes)}">
           <a class="showtime-option" th:each="sessao : ${filme.sessoes}"

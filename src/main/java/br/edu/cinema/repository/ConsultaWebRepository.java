@@ -86,7 +86,6 @@ public class ConsultaWebRepository {
         return jdbc.queryForList("""
                 SELECT f.id_filme AS id, f.titulo_original AS titulo, f.sinopse,
                        f.genero_principal AS genero, f.classificacao_indicativa AS classificacao,
-                       f.data_estreia, f.url_capa AS capa,
                        s.id_sessao AS sessao_id, s.data_sessao AS data, s.horario_inicio AS horario,
                        s.idioma, s.tipo, sa.numero AS sala,
                        (SELECT ph.preco_base FROM sessao_preco_historico ph
@@ -101,7 +100,7 @@ public class ConsultaWebRepository {
 
     public Map<String,Object> detalhesSessao(int sessaoId) {
         return jdbc.queryForMap("""
-                SELECT f.titulo_original AS titulo, f.sinopse, f.data_estreia, f.url_capa AS capa,
+                SELECT f.titulo_original AS titulo, f.sinopse,
                        f.genero_principal AS genero, f.classificacao_indicativa AS classificacao,
                        s.data_sessao AS data, s.horario_inicio AS horario, s.idioma, s.tipo, sa.numero AS sala
                 FROM sessao s JOIN filme f ON f.id_filme=s.id_filme

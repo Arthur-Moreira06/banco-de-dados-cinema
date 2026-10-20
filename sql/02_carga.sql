@@ -38,12 +38,12 @@ INSERT INTO assento (id_sala, fileira, numero, tipo) VALUES
 (3,'B',1,'VIP'),(3,'B',2,'VIP'),(3,'B',3,'Padrao'),(3,'B',4,'Padrao');
 
 INSERT INTO funcionario (nome, cpf, telefone, cargo, login, senha_hash, perfil_acesso, data_admissao, ativo) VALUES
-('Mariana Duarte Costa', '11111111111', '(61) 99811-2233', 'Atendente', 'mariana.costa', 'hash_fake_1', 'Operacional', '2024-02-01', 1),
-('Bruno Ferreira Lima',  '22222222222', '(61) 99822-3344', 'Atendente', 'bruno.lima',   'hash_fake_2', 'Operacional', '2024-05-15', 1),
-('Carla Nogueira Alves', '33333333333', '(61) 99833-4455', 'Gerente',   'carla.alves',  'hash_fake_3', 'Administrativo', '2021-03-10', 1),
-('Diego Martins Souza',  '44444444444', '(61) 99844-5566', 'Projecionista', 'diego.souza', 'hash_fake_4', 'Operacional', '2023-07-20', 1),
+('Mariana Duarte Costa', '11111111111', '(61) 99811-2233', 'Atendente', 'mariana.costa', '$pbkdf2-sha256$210000$b3fkkCU-yE9Lp6VK92iI2g$yE5NpaHc_T7A0Fc7TIBPmqp3J5FmmOz5PB8Ss7l3wvU', 'Operacional', '2024-02-01', 1),
+('Bruno Ferreira Lima',  '22222222222', '(61) 99822-3344', 'Atendente', 'bruno.lima',   '$pbkdf2-sha256$210000$DqJE5dJt83bsTGO__2uGWw$QpqcA6mUqPrLBEU-74YAS_4xQTQqYFRuzX28IsFAhdk', 'Operacional', '2024-05-15', 1),
+('Carla Nogueira Alves', '33333333333', '(61) 99833-4455', 'Gerente',   'carla.alves',  '$pbkdf2-sha256$210000$hKgC8eWfhl2ayG28A7aKZQ$3PRcSrnqPsuLVVn4JvcCE2YV_vHiy_rDjowaHL8WKUs', 'Administrativo', '2021-03-10', 1),
+('Diego Martins Souza',  '44444444444', '(61) 99844-5566', 'Projecionista', 'diego.souza', '$pbkdf2-sha256$210000$QDFYP_MiWJMzipDgR3pYsA$bDmuUqCzT9a__4dTdCM3bIIYibPwtau343qUiCbPFpU', 'Operacional', '2023-07-20', 1),
 -- funcionario recem-contratado, ainda sem sala/certificado atribuidos
-('Eduardo Pires Rocha',  '55555555555', NULL,               'Projecionista', 'eduardo.rocha', 'hash_fake_5', 'Operacional', '2026-09-01', 1);
+('Eduardo Pires Rocha',  '55555555555', NULL,               'Projecionista', 'eduardo.rocha', '$pbkdf2-sha256$210000$PIwDW3-j8vtl2x4rzzxjpQ$BXfhuYt4itEAwqZXyLyYbnAUWg-fz-xFdv_mjPKjlXk', 'Operacional', '2026-09-01', 1);
 
 INSERT INTO atendente (id_funcionario, numero_guiche, turno, vendas_dia) VALUES
 (1, 1, 'Vespertino', 0),

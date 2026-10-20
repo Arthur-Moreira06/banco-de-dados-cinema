@@ -1,22 +1,87 @@
-Sistema de Gestão de Rede de Cinemas
+# Sistema de Gestão para Rede de Cinemas
 
-Visão Geral do Projeto
-Repositório desenvolvido para a entrega da Etapa 1 do Projeto Final da disciplina de Laboratório de Banco de Dados. O objetivo deste projeto é projetar, implementar e validar um sistema de banco de dados relacional completo, englobando desde a modelagem conceitual e lógica até a criação de scripts de infraestrutura (DDL), povoamento de dados (DML) com casos de contorno e consultas analíticas avançadas.
+Aplicação web acadêmica para administrar filmes, sessões, salas, clientes, funcionários, vendas de ingressos e produtos de bomboniere. O sistema usa Java, Spring Boot, Thymeleaf, JDBC e MySQL.
 
-Tema do Projeto
-O sistema simula a administração de uma rede de cinemas, controlando os principais fluxos operacionais da empresa, que incluem:
- Gestão do catálogo de filmes e autorrelacionamentos (sequências e prelúdios).
- Programação de sessões, salas, tipos de projeção e controle de assentos.
- Cadastro de funcionários (com especialização em atendentes, gerentes e projecionistas) e clientes.
- Processo de venda de ingressos (com controle de meia-entrada e histórico de status) e produtos de bomboniere.
- Controle de pagamentos, pontos de fidelidade e regras de negócio complexas validadas por triggers.
+## Requisitos
 
-Atualização do catálogo da aplicação web
-Para bancos já existentes, execute uma vez o script `sql/06_atualizar_catalogo_filmes.sql` antes de iniciar a aplicação. Ele adiciona data de estreia e URL da capa ao cadastro de filmes sem recriar o banco. Depois, preencha esses campos em Gerente > Filmes; a sinopse já existente também é exibida na seleção de sessões.
+- Java 26 (conforme configurado no `pom.xml`)
+- Maven instalado e disponível no terminal (`mvn`)
+- MySQL 8.x em execução
+- Git, caso o projeto seja obtido por clone
 
-Integrantes
- ARTHUR MOREIRA ALVES DA SILVA;
- ANDREY GABRIEL LINS FERREIRA;
- PAULO FERNANDO SANTOS AMORIM DOS REIS;
- ALEXANDRE BRAGA RODRIGUES;
- ANA BEATRIZ CALDEIRA FAULIN; 
+## Preparar o banco de dados
+
+No MySQL Workbench, conecte-se com uma conta administrativa, abra cada arquivo SQL com **File > Open SQL Script** e execute-o pelo botão do raio. Para uma instalação nova, execute os scripts nesta ordem:
+
+1. `sql/01_ddl.sql` — cria o banco `cinema` e suas tabelas.
+2. `sql/02_carga.sql` — insere dados fictícios para demonstração.
+3. `sql/03_consultas.sql` — opcional; executa consultas de conferência.
+
+> **Atenção:** `sql/01_ddl.sql` começa com `DROP DATABASE IF EXISTS cinema`. Isso apaga por completo um banco `cinema` existente. Use-o somente em uma instalação nova ou em um ambiente descartável, depois de confirmar que não há dados a preservar.
+
+Se você já tem um banco criado pela versão anterior, mantenha os dados e execute uma única vez `sql/04_remover_campos_estreia_e_capa.sql` para remover as colunas antigas de estreia e URL de capa. Não execute essa migração numa instalação nova: o `01_ddl.sql` já cria a tabela sem esses campos.
+
+Depois de criar e carregar o banco, crie uma conta local para a aplicação. Execute no Workbench como administrador:
+
+```sql
+CREATE USER IF NOT EXISTS 'cinema_app'@'localhost'
+    IDENTIFIED BY 'CinemaApresentacao#26';
+ALTER USER 'cinema_app'@'localhost'
+    IDENTIFIED BY 'CinemaApresentacao#26';
+GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.*
+    TO 'cinema_app'@'localhost';
+```
+
+### Configurar o acesso da aplicação
+
+A aplicação lê a configuração do banco pelas variáveis abaixo. Crie um arquivo `.env` na raiz do projeto (ele é ignorado pelo Git) ou defina as variáveis no ambiente:
+
+```properties
+CINEMA_DB_URL=jdbc:mysql://localhost:3306/cinema?serverTimezone=America/Sao_Paulo&useSSL=false&allowPublicKeyRetrieval=true
+CINEMA_DB_USER=cinema_app
+CINEMA_DB_PASSWORD=CinemaApresentacao#26
+```
+
+O usuário do banco precisa conseguir conectar e executar `SELECT`, `INSERT`, `UPDATE` e `DELETE` nas tabelas de `cinema`. A senha acima é padronizada para desenvolvimento e apresentação local; não a reutilize em produção ou em outros serviços. O projeto não inclui um script versionado para criar esse usuário do MySQL.
+
+Não compartilhe nem publique o `.env`. O arquivo já está listado no `.gitignore`.
+
+## Executar a aplicação
+
+Na raiz do projeto, com o MySQL ativo e a configuração do banco preenchida:
+
+```powershell
+mvn spring-boot:run
+```
+
+Quando a inicialização terminar, acesse [http://localhost:8080](http://localhost:8080). Para interromper a aplicação, pressione `Ctrl+C` no terminal.
+
+Também é possível abrir a pasta no IntelliJ IDEA, aguardar a importação do Maven e executar a classe `br.edu.cinema.app.CinemaApplication`.
+
+## Acesso de demonstração
+
+Os funcionários fictícios inseridos por `sql/02_carga.sql` usam a senha `CinemaFuncionario#26` e hashes PBKDF2 compatíveis com a aplicação. Logins disponíveis: `carla.alves` (gerente), `mariana.costa` e `bruno.lima` (atendentes), `diego.souza` e `eduardo.rocha` (projecionistas). Essas credenciais são somente para demonstração local; troque-as antes de qualquer uso fora desse contexto.
+
+Se o banco já foi carregado por uma versão anterior de `sql/02_carga.sql`, execute uma vez `sql/05_atualizar_senhas_demo.sql` no Workbench para substituir os hashes fictícios dos funcionários de demonstração. Não coloque senhas em texto puro diretamente no banco.
+
+## Arquivos SQL disponíveis
+
+- `sql/01_ddl.sql` — criação do esquema e objetos do banco.
+- `sql/02_carga.sql` — dados fictícios de demonstração.
+- `sql/03_consultas.sql` — consultas de conferência do projeto.
+- `sql/04_remover_campos_estreia_e_capa.sql` — migração de bancos antigos descrita acima; não faz parte da carga inicial.
+- `sql/05_atualizar_senhas_demo.sql` — atualiza as senhas dos funcionários fictícios em bancos já carregados com a versão anterior da carga.
+
+## Observações
+
+- O projeto usa o banco MySQL `cinema` e a aplicação escuta na porta `8080` por padrão.
+- `sql/02_carga.sql` contém dados fictícios; não use informações pessoais reais em demonstrações ou commits.
+- A seleção de sessões mantém a capa genérica do filme e exibe sinopse e horários cadastrados.
+
+## Integrantes
+
+- Arthur Moreira Alves da Silva
+- Andrey Gabriel Lins Ferreira
+- Paulo Fernando Santos Amorim dos Reis
+- Alexandre Braga Rodrigues
+- Ana Beatriz Caldeira Faulin

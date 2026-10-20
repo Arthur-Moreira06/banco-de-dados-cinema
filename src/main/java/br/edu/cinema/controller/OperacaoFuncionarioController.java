@@ -209,8 +209,6 @@ public class OperacaoFuncionarioController {
                 novo.put("sinopse", linha.get("sinopse"));
                 novo.put("genero", linha.get("genero"));
                 novo.put("classificacao", linha.get("classificacao"));
-                novo.put("data_estreia", linha.get("data_estreia"));
-                novo.put("capa", linha.get("capa"));
                 novo.put("sessoes", new ArrayList<Map<String,Object>>());
                 return novo;
             });
