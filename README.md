@@ -65,8 +65,8 @@ Os registros da carga base usam a senha `CinemaFuncionario#26`. Logins: `carla.a
 ## Documentação revisada
 
 - `docs/MER cinema.pdf` e `docs/modelo logico relacional cinema.pdf`: diagramas originais da Etapa 1, mantidos sem substituição.
-- `docs/Dicionario_MER_Revisado.pdf`: dicionário MER independente revisado, com a capa e a tabela de 20 RNs alinhadas.
-- `docs/RelatorioGeral_Etapa1_Revisado.pdf`: relatório atualizado. Ele distingue os diagramas originais da implementação física descrita no DDL vigente.
+- `docs/Dicionario_MER_Atualizado.pdf`: dicionário MER independente revisado, com a capa e a tabela de 20 RNs alinhadas.
+- `docs/RelatorioGeral_Etapa1_Atualizado.pdf`: relatório atualizado. Ele distingue os diagramas originais da implementação física descrita no DDL vigente.
 - `docs/RelatorioGeral.pdf`: relatório original, preservado.
 
 Os diagramas originais representam a modelagem entregue na Etapa 1 e não foram redesenhados nesta revisão.
