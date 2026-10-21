@@ -1,1 +1,97 @@
-<!doctype html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Venda de produtos | Cinema</title><link rel="stylesheet" th:href="@{/css/cinema.css}"><script defer th:src="@{/js/tema.js}"></script></head><body><header th:replace="~{fragments/cabecalho :: cabecalho}"></header><main class="container form-container"><a class="back-link" href="/funcionario">← Voltar à área do funcionário</a><div class="form-card"><span class="eyebrow">BOMBONIERE</span><h1>Vender produtos</h1><p>O estoque e o pagamento são atualizados juntos na venda.</p><div class="alert" th:if="${erro}" th:text="${erro}"></div><div class="success" th:if="${sucesso}" th:text="${sucesso}"></div><form class="data-form" method="post" th:action="@{/funcionario/vendas-produtos}"><div class="field"><label for="produtoId">Produto</label><select id="produtoId" name="produtoId" required><option value="">Selecione</option><option th:each="p : ${produtos}" th:value="${p.id}" th:text="|${p.nome} — R$ ${p.preco} (estoque: ${p.estoque})|"></option></select></div><div class="field"><label for="quantidade">Quantidade</label><input id="quantidade" name="quantidade" type="number" min="1" value="1" required></div><div class="field"><label for="clienteId">Cliente (opcional)</label><select id="clienteId" name="clienteId"><option value="">Venda sem cadastro de cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select></div><div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div><div class="form-actions"><a class="secondary-button" href="/funcionario">Cancelar</a><button class="primary-button" type="submit">Registrar venda</button></div></form></div></main></body></html>
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Venda de produtos | Cinema</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css(v=2)}">
+  <script defer th:src="@{/js/tema.js}"></script>
+  <script defer th:src="@{/js/venda-produtos.js(v=7)}"></script>
+</head>
+<body>
+<header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
+<main class="container product-store">
+  <a class="back-link" href="/funcionario">← Voltar à área do funcionário</a>
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">BOMBONIERE</span>
+      <h1>Escolha seus produtos</h1>
+      <p>Explore as categorias e selecione os itens para a venda.</p>
+    </div>
+  </div>
+
+  <div class="alert" th:if="${erro}" th:text="${erro}"></div>
+  <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
+
+  <nav class="product-categories" aria-label="Categorias de produtos">
+    <button class="category-chip is-active" type="button" data-filter="Todas" aria-pressed="true">Todos</button>
+    <button class="category-chip" type="button" data-filter="Pipoca" aria-pressed="false">Pipoca</button>
+    <button class="category-chip" type="button" data-filter="Bebida" aria-pressed="false">Bebidas</button>
+    <button class="category-chip" type="button" data-filter="Doce" aria-pressed="false">Doces</button>
+    <button class="category-chip" type="button" data-filter="Combo" aria-pressed="false">Combos</button>
+    <button class="category-chip" type="button" data-filter="Outro" aria-pressed="false">Outros</button>
+  </nav>
+
+  <section class="product-grid" aria-label="Produtos disponíveis">
+    <article class="product-card" th:each="p : ${produtos}"
+             th:attr="data-category=${p.categoria},data-product-id=${p.id},data-product-name=${p.nome},data-product-price=${p.preco},data-stock=${p.estoque}">
+      <button class="product-card__select" type="button" th:attr="aria-label=|Selecionar ${p.nome} para compra|">
+        <span class="product-photo" th:classappend="|product-photo--${#strings.toLowerCase(p.categoria)}|" aria-hidden="true"></span>
+        <span class="product-card__content">
+          <span class="product-card__category" th:text="${p.categoria}">Categoria</span>
+          <strong class="product-card__name" th:text="${p.nome}">Produto</strong>
+          <span class="product-card__price" th:text="|R$ ${#numbers.formatDecimal(p.preco,1,2)}|">R$ 0,00</span>
+        </span>
+        <span class="product-card__cta">Escolher produto <span aria-hidden="true">→</span></span>
+      </button>
+      <div class="product-card__footer">
+        <span class="stock-label" th:text="|${p.estoque} disponíveis|">Estoque</span>
+        <div class="quantity-control" th:attr="data-quantity-control=${p.id}">
+          <button type="button" class="quantity-step" data-step="-1" th:attr="aria-label=|Diminuir quantidade de ${p.nome}|">−</button>
+          <output class="quantity-value" aria-live="polite">1</output>
+          <button type="button" class="quantity-step" data-step="1" th:attr="aria-label=|Aumentar quantidade de ${p.nome}|">+</button>
+        </div>
+      </div>
+    </article>
+    <p class="product-empty" th:if="${#lists.isEmpty(produtos)}">Não há produtos disponíveis no estoque.</p>
+  </section>
+
+  <section class="purchase-panel" id="purchase-section" aria-labelledby="purchase-title">
+    <div class="purchase-panel__heading">
+      <div>
+        <span class="eyebrow">FINALIZAÇÃO</span>
+        <h2 id="purchase-title">Área de compra</h2>
+      </div>
+      <span class="purchase-hint">Selecione um produto acima para começar</span>
+    </div>
+    <div class="selected-product" id="selected-product" hidden>
+      <span class="selected-product__photo" id="selected-product-photo" aria-hidden="true"></span>
+      <div class="selected-product__details">
+        <span class="product-card__category" id="selected-product-category"></span>
+        <strong id="selected-product-name"></strong>
+        <span id="selected-product-price"></span>
+      </div>
+      <span class="selected-product__total" id="selected-product-total"></span>
+    </div>
+    <form class="data-form product-purchase-form" id="product-purchase-form" method="post" th:action="@{/funcionario/vendas-produtos}">
+      <input id="produtoId" name="produtoId" type="hidden" required>
+      <div class="field">
+        <label for="quantidade">Quantidade</label>
+        <input id="quantidade" name="quantidade" type="number" min="1" value="1" required disabled>
+      </div>
+      <div class="field">
+        <label for="clienteId">Cliente (opcional)</label>
+        <select id="clienteId" name="clienteId"><option value="">Venda sem cadastro de cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select>
+      </div>
+      <div class="field">
+        <label for="pagamento">Forma de pagamento</label>
+        <select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select>
+      </div>
+      <div class="form-actions">
+        <button class="primary-button" id="submit-product-sale" type="submit" disabled>Registrar venda</button>
+      </div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

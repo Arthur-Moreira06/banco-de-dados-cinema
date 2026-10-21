@@ -36,7 +36,7 @@ public class OperacaoFuncionarioController {
     @GetMapping("/vendas-produtos")
     public String formularioProdutos(Model model, HttpSession session) {
         model.addAttribute("usuario", session.getAttribute("usuario"));
-        model.addAttribute("produtos", jdbc.queryForList("SELECT id_produto AS id,nome,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto ORDER BY nome"));
+        model.addAttribute("produtos", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto WHERE estoque_atual>0 ORDER BY categoria,nome"));
         model.addAttribute("clientes", jdbc.queryForList("SELECT id_cliente AS id,nome FROM cliente ORDER BY nome"));
         return "venda-produtos";
     }
