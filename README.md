@@ -5,23 +5,29 @@ Aplicação web acadêmica para administrar filmes, sessões, salas, clientes, f
 ## Requisitos
 
 - Java 26 (conforme configurado no `pom.xml`)
-- Maven instalado e disponível no terminal (`mvn`)
-- MySQL 8.x em execução
+- Maven disponível no terminal (`mvn`)
+- MySQL 8.0 ou superior
 - Git, caso o projeto seja obtido por clone
 
-## Preparar o banco de dados
+## Instalação em uma base nova
 
-No MySQL Workbench, conecte-se com uma conta administrativa, abra cada arquivo SQL com **File > Open SQL Script** e execute-o pelo botão do raio. Para uma instalação nova, execute os scripts nesta ordem:
+No MySQL Workbench, conecte-se com uma conta administrativa. Abra cada arquivo com **File > Open SQL Script** e execute pelo raio, nesta ordem:
 
-1. `sql/01_ddl.sql` — cria o banco `cinema` e suas tabelas.
-2. `sql/02_carga.sql` — insere dados fictícios para demonstração.
-3. `sql/03_consultas.sql` — opcional; executa consultas de conferência.
+1. `sql/01_ddl.sql` cria o banco e as tabelas.
+2. `sql/02_carga.sql` insere casos de demonstração e o lote sintético de volume.
+3. `sql/03_consultas.sql` executa as quinze consultas de verificação.
 
-> **Atenção:** `sql/01_ddl.sql` começa com `DROP DATABASE IF EXISTS cinema`. Isso apaga por completo um banco `cinema` existente. Use-o somente em uma instalação nova ou em um ambiente descartável, depois de confirmar que não há dados a preservar.
+> **Atenção:** `01_ddl.sql` começa com `DROP DATABASE IF EXISTS cinema`. Ele apaga o banco `cinema` e todos os dados nele. Use somente para instalação nova ou ambiente descartável, depois de confirmar que não há dados a preservar.
 
-Se você já tem um banco criado pela versão anterior, mantenha os dados e execute uma única vez `sql/04_remover_campos_estreia_e_capa.sql` para remover as colunas antigas de estreia e URL de capa. Não execute essa migração numa instalação nova: o `01_ddl.sql` já cria a tabela sem esses campos.
+Depois da carga, as principais dimensões têm pelo menos 40 registros; o lote inclui 100 compras, 100 ingressos e mais de 200 eventos de status. Os dados adicionais são fictícios e gerados para demonstração de consultas. O lote de demonstração não representa volume de produção.
 
-Depois de criar e carregar o banco, crie uma conta local para a aplicação. Execute no Workbench como administrador:
+## Bancos existentes
+
+O DDL recria o banco inteiro. Em uma base com dados que precisam ser mantidos, faça backup antes e não execute `sql/01_ddl.sql` sem planejar migração. Os scripts `04` e `05` citados em versões antigas do README não fazem parte desta entrega.
+
+## Usuário e credenciais da aplicação
+
+No Workbench, como administrador, crie/configure a conta local da aplicação:
 
 ```sql
 CREATE USER IF NOT EXISTS 'cinema_app'@'localhost'
@@ -32,9 +38,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.*
     TO 'cinema_app'@'localhost';
 ```
 
-### Configurar o acesso da aplicação
-
-A aplicação lê a configuração do banco pelas variáveis abaixo. Crie um arquivo `.env` na raiz do projeto (ele é ignorado pelo Git) ou defina as variáveis no ambiente:
+Crie um arquivo `.env` na raiz ou defina estas variáveis no ambiente:
 
 ```properties
 CINEMA_DB_URL=jdbc:mysql://localhost:3306/cinema?serverTimezone=America/Sao_Paulo&useSSL=false&allowPublicKeyRetrieval=true
@@ -42,46 +46,36 @@ CINEMA_DB_USER=cinema_app
 CINEMA_DB_PASSWORD=CinemaApresentacao#26
 ```
 
-O usuário do banco precisa conseguir conectar e executar `SELECT`, `INSERT`, `UPDATE` e `DELETE` nas tabelas de `cinema`. A senha acima é padronizada para desenvolvimento e apresentação local; não a reutilize em produção ou em outros serviços. O projeto não inclui um script versionado para criar esse usuário do MySQL.
+O `.env` está no `.gitignore`. Não o publique nem o envie ao repositório. A senha fixa é apenas para a apresentação local do projeto; não a reutilize em produção.
 
-Não compartilhe nem publique o `.env`. O arquivo já está listado no `.gitignore`.
+## Iniciar
 
-## Executar a aplicação
-
-Na raiz do projeto, com o MySQL ativo e a configuração do banco preenchida:
+Com MySQL ativo, banco carregado e variáveis definidas, execute na pasta raiz:
 
 ```powershell
 mvn spring-boot:run
 ```
 
-Quando a inicialização terminar, acesse [http://localhost:8080](http://localhost:8080). Para interromper a aplicação, pressione `Ctrl+C` no terminal.
+Abra [http://localhost:8080](http://localhost:8080). Para parar, pressione `Ctrl+C`. No IntelliJ, importe a pasta pelo `pom.xml`, aguarde a carga do Maven e execute `br.edu.cinema.app.CinemaApplication`.
 
-Também é possível abrir a pasta no IntelliJ IDEA, aguardar a importação do Maven e executar a classe `br.edu.cinema.app.CinemaApplication`.
+## Usuários de demonstração
 
-## Acesso de demonstração
+Os registros da carga base usam a senha `CinemaFuncionario#26`. Logins: `carla.alves` (gerente), `mariana.costa` e `bruno.lima` (atendentes), `diego.souza` e `eduardo.rocha` (projecionistas). Os logins sintéticos `volume.demoNNN` servem para carga e ficam inativos; não são contas de apresentação.
 
-Os funcionários fictícios inseridos por `sql/02_carga.sql` usam a senha `CinemaFuncionario#26` e hashes PBKDF2 compatíveis com a aplicação. Logins disponíveis: `carla.alves` (gerente), `mariana.costa` e `bruno.lima` (atendentes), `diego.souza` e `eduardo.rocha` (projecionistas). Essas credenciais são somente para demonstração local; troque-as antes de qualquer uso fora desse contexto.
+## Documentação revisada
 
-Se o banco já foi carregado por uma versão anterior de `sql/02_carga.sql`, execute uma vez `sql/05_atualizar_senhas_demo.sql` no Workbench para substituir os hashes fictícios dos funcionários de demonstração. Não coloque senhas em texto puro diretamente no banco.
+- `docs/MER cinema.pdf` e `docs/modelo logico relacional cinema.pdf`: diagramas originais da Etapa 1, mantidos sem substituição.
+- `docs/Dicionario_MER_Revisado.pdf`: dicionário MER independente revisado, com a capa e a tabela de 20 RNs alinhadas.
+- `docs/RelatorioGeral_Etapa1_Revisado.pdf`: relatório atualizado. Ele distingue os diagramas originais da implementação física descrita no DDL vigente.
+- `docs/RelatorioGeral.pdf`: relatório original, preservado.
 
-## Arquivos SQL disponíveis
+Os diagramas originais representam a modelagem entregue na Etapa 1 e não foram redesenhados nesta revisão.
 
-- `sql/01_ddl.sql` — criação do esquema e objetos do banco.
-- `sql/02_carga.sql` — dados fictícios de demonstração.
-- `sql/03_consultas.sql` — consultas de conferência do projeto.
-- `sql/04_remover_campos_estreia_e_capa.sql` — migração de bancos antigos descrita acima; não faz parte da carga inicial.
-- `sql/05_atualizar_senhas_demo.sql` — atualiza as senhas dos funcionários fictícios em bancos já carregados com a versão anterior da carga.
-
-## Observações
-
-- O projeto usa o banco MySQL `cinema` e a aplicação escuta na porta `8080` por padrão.
-- `sql/02_carga.sql` contém dados fictícios; não use informações pessoais reais em demonstrações ou commits.
-- A seleção de sessões mantém a capa genérica do filme e exibe sinopse e horários cadastrados.
-
-## Integrantes
+## Integrantes — Grupo 3
 
 - Arthur Moreira Alves da Silva
 - Andrey Gabriel Lins Ferreira
 - Paulo Fernando Santos Amorim dos Reis
 - Alexandre Braga Rodrigues
 - Ana Beatriz Caldeira Faulin
+

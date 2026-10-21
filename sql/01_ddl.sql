@@ -1,3 +1,10 @@
+-- Arquivo: 01_ddl.sql
+-- Projeto: Sistema de Gestao para Rede de Cinemas (Grupo 3)
+-- Objetivo: criar o esquema relacional e suas restricoes no MySQL 8.
+-- Execucao: usar apenas em base descartavel; o script remove o banco cinema.
+-- Ordem da entrega: executar 01_ddl.sql, depois 02_carga.sql e 03_consultas.sql.
+-- Regras: todas as PK, FK, UQ, CHECK e INDEX possuem nomes padronizados.
+
 DROP DATABASE IF EXISTS cinema;
 
 CREATE DATABASE cinema
@@ -15,8 +22,8 @@ CREATE TABLE filme (
     id_filme_relacionado INT UNSIGNED NULL,
     tipo_relacao ENUM('Sequencia','Preludio') NULL,
     
-    CONSTRAINT pk_filme PRIMARY KEY (id_filme),
-    CONSTRAINT fk_filme_relacionado FOREIGN KEY (id_filme_relacionado)
+    CONSTRAINT pk_filme PRIMARY KEY(id_filme),
+    CONSTRAINT fk_filme_filme_id_filme_relacionado FOREIGN KEY(id_filme_relacionado)
         REFERENCES filme (id_filme)
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT ck_filme_duracao CHECK (duracao_minutos > 0)
@@ -31,8 +38,8 @@ CREATE TABLE sala (
     capacidade	SMALLINT UNSIGNED NOT NULL,
     tipo_projecao	ENUM('2D','3D','IMAX') NOT NULL,
     
-    CONSTRAINT pk_sala PRIMARY KEY (id_sala),
-    CONSTRAINT uq_sala_numero UNIQUE (numero),
+    CONSTRAINT pk_sala PRIMARY KEY(id_sala),
+    CONSTRAINT uq_sala_numero UNIQUE(numero),
     CONSTRAINT ck_sala_capacidade CHECK (capacidade > 0)
 ) ENGINE=InnoDB
   COMMENT='RN03: salas de exibição e sua tecnologia de projeção';
@@ -44,11 +51,11 @@ CREATE TABLE sala (
     numero TINYINT UNSIGNED NOT NULL,
     tipo ENUM('Padrao','VIP','PCD','Namorados') NOT NULL DEFAULT 'Padrao',
     
-    CONSTRAINT pk_assento PRIMARY KEY (id_assento),
-    CONSTRAINT fk_assento_sala FOREIGN KEY (id_sala)
+    CONSTRAINT pk_assento PRIMARY KEY(id_assento),
+    CONSTRAINT fk_assento_sala_id_sala FOREIGN KEY(id_sala)
         REFERENCES sala (id_sala)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT uq_assento_posicao UNIQUE (id_sala, fileira, numero)
+    CONSTRAINT uq_assento_id_sala_fileira_numero UNIQUE(id_sala, fileira, numero)
 ) ENGINE=InnoDB
   COMMENT='RN04: mapeamento único de assentos (fileira+número) por sala';
 
@@ -66,8 +73,9 @@ CREATE TABLE funcionario (
     data_admissao DATE NOT NULL,
     ativo TINYINT(1) NOT NULL DEFAULT 1,
     
-    CONSTRAINT pk_id_funcionario PRIMARY KEY(id_funcionario),
+    CONSTRAINT pk_funcionario PRIMARY KEY(id_funcionario),
     CONSTRAINT uq_funcionario_cpf UNIQUE(CPF),
+    CONSTRAINT uq_funcionario_login UNIQUE (login),
     CONSTRAINT ck_funcionario_cpf CHECK (CHAR_LENGTH(cpf) = 11)
 )ENGINE=InnoDB
   COMMENT='RN16: quadro de funcionários e credenciais de acesso';
@@ -78,8 +86,8 @@ CREATE TABLE atendente(
     turno ENUM('Matutino','Vespertino','Noturno') NOT NULL,
     vendas_dia SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     
-    CONSTRAINT pk_id_funcionario PRIMARY KEY(id_funcionario),
-    CONSTRAINT fk_id_funcionario FOREIGN KEY(id_funcionario)
+    CONSTRAINT pk_atendente PRIMARY KEY(id_funcionario),
+    CONSTRAINT fk_atendente_funcionario_id_funcionario FOREIGN KEY(id_funcionario)
 		REFERENCES funcionario (id_funcionario)
         ON DELETE CASCADE ON UPDATE CASCADE
 )ENGINE=InnoDB
@@ -91,8 +99,8 @@ CREATE TABLE gerente (
     nivel_acesso INT UNSIGNED NOT NULL,
     gratificacao_cargo DECIMAL(8,2) NOT NULL DEFAULT 0.00,
     
-    CONSTRAINT pk_id_funcionario PRIMARY KEY(id_funcionario),
-    CONSTRAINT fk_id_funcionario_gerente FOREIGN KEY(id_funcionario) 
+    CONSTRAINT pk_gerente PRIMARY KEY(id_funcionario),
+    CONSTRAINT fk_gerente_funcionario_id_funcionario FOREIGN KEY(id_funcionario) 
 		REFERENCES funcionario (id_funcionario) 
         ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT ck_gerente_gratificacao CHECK(gratificacao_cargo >= 0)
@@ -105,14 +113,14 @@ CREATE TABLE projecionista (
     id_sala_responsavel INT UNSIGNED NULL,
     certificado_tec VARCHAR(50) NULL,
     
-    CONSTRAINT pk_id_funcionario_proj PRIMARY KEY(id_funcionario),
-    CONSTRAINT fk_projecionista_funcionario FOREIGN KEY(id_funcionario)
+    CONSTRAINT pk_projecionista PRIMARY KEY(id_funcionario),
+    CONSTRAINT fk_projecionista_funcionario_id_funcionario FOREIGN KEY(id_funcionario)
 		REFERENCES funcionario(id_funcionario)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_id_gerente FOREIGN KEY(id_gerente)
+    CONSTRAINT fk_projecionista_gerente_id_gerente FOREIGN KEY(id_gerente)
 		REFERENCES gerente(id_funcionario) 
 		ON DELETE SET NULL ON UPDATE CASCADE,
-	CONSTRAINT fk_projecionista_sala FOREIGN KEY (id_sala_responsavel)
+	CONSTRAINT fk_projecionista_sala_id_sala_responsavel FOREIGN KEY(id_sala_responsavel)
         REFERENCES sala (id_sala)
         ON DELETE SET NULL ON UPDATE CASCADE
 )ENGINE=InnoDB
@@ -126,9 +134,9 @@ CREATE TABLE cliente (
     email VARCHAR(100) NOT NULL,
 	data_nascimento DATE NOT NULL,
     
-	CONSTRAINT pk_id_cliente PRIMARY KEY(id_cliente),
+	CONSTRAINT pk_cliente PRIMARY KEY(id_cliente),
     CONSTRAINT uq_cliente_cpf UNIQUE(CPF),
-    CONSTRAINT ck_cliente_cpf CHECK (CHAR_LENGTH(cpf) = 11),
+    CONSTRAINT ck_cliente_cliente_cpf CHECK (CHAR_LENGTH(cpf) = 11),
     CONSTRAINT uq_cliente_email UNIQUE(email)
 ) ENGINE=InnoDB
   COMMENT='RN08: cadastro de clientes';
@@ -140,8 +148,8 @@ CREATE TABLE documento_meia_entrada (
     numero_documento VARCHAR(30) NOT NULL,
     validade DATE NULL,
     
-    CONSTRAINT pk_documento_meia PRIMARY KEY (id_documento),
-    CONSTRAINT fk_documento_cliente FOREIGN KEY (id_cliente)
+    CONSTRAINT pk_documento_meia_entrada PRIMARY KEY(id_documento),
+    CONSTRAINT fk_documento_meia_entrada_cliente_id_cliente FOREIGN KEY(id_cliente)
         REFERENCES cliente (id_cliente)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
@@ -156,14 +164,14 @@ CREATE TABLE sessao (
     idioma ENUM('Dublado','Legendado','Original') NOT NULL,
     tipo ENUM('2D','3D','IMAX') NOT NULL,
 
-	CONSTRAINT pk_id_sessao PRIMARY KEY(id_sessao),
-    CONSTRAINT fk_id_filme FOREIGN KEY(id_filme)
+	CONSTRAINT pk_sessao PRIMARY KEY(id_sessao),
+    CONSTRAINT fk_sessao_filme_id_filme FOREIGN KEY(id_filme)
 		REFERENCES filme (id_filme)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-	CONSTRAINT fk_id_sala FOREIGN KEY(id_sala)
+	CONSTRAINT fk_sessao_sala_id_sala FOREIGN KEY(id_sala)
 		REFERENCES sala (id_sala)
         ON DELETE CASCADE ON UPDATE CASCADE,
-	CONSTRAINT uq_sessao_sala_horario UNIQUE (id_sala, data_sessao, horario_inicio)
+	CONSTRAINT uq_sessao_id_sala_data_sessao_horario_inicio UNIQUE(id_sala, data_sessao, horario_inicio)
 ) ENGINE=InnoDB
   COMMENT='RN05/RN06: programação de sessões por filme/sala/data/horário';
   
@@ -176,11 +184,11 @@ CREATE TABLE sessao_preco_historico (
     preco_base DECIMAL(6,2) NOT NULL,
     vigencia_inicio DATETIME NOT NULL,
     
-    CONSTRAINT pk_sessao_preco PRIMARY KEY (id_preco),
-    CONSTRAINT fk_preco_sessao FOREIGN KEY (id_sessao)
+    CONSTRAINT pk_sessao_preco_historico PRIMARY KEY(id_preco),
+    CONSTRAINT fk_sessao_preco_historico_sessao_id_sessao FOREIGN KEY(id_sessao)
         REFERENCES sessao (id_sessao)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT uq_preco_sessao_vigencia UNIQUE (id_sessao, vigencia_inicio),
+    CONSTRAINT uq_sessao_preco_historico_id_sessao_vigencia_inicio UNIQUE(id_sessao, vigencia_inicio),
     CONSTRAINT ck_preco_base CHECK (preco_base > 0)
 ) ENGINE=InnoDB
   COMMENT='RN07: histórico datado de preço base por sessão';
@@ -195,20 +203,20 @@ CREATE TABLE sessao_preco_historico (
     preco_pago DECIMAL(6,2) NOT NULL,
     data_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    CONSTRAINT pk_ingresso PRIMARY KEY (id_ingresso),
-    CONSTRAINT fk_ingresso_sessao FOREIGN KEY (id_sessao)
+    CONSTRAINT pk_ingresso PRIMARY KEY(id_ingresso),
+    CONSTRAINT fk_ingresso_sessao_id_sessao FOREIGN KEY(id_sessao)
         REFERENCES sessao (id_sessao)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_ingresso_assento FOREIGN KEY (id_assento)
+    CONSTRAINT fk_ingresso_assento_id_assento FOREIGN KEY(id_assento)
         REFERENCES assento (id_assento)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_ingresso_cliente FOREIGN KEY (id_cliente)
+    CONSTRAINT fk_ingresso_cliente_id_cliente FOREIGN KEY(id_cliente)
         REFERENCES cliente (id_cliente)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_ingresso_documento FOREIGN KEY (id_documento)
+    CONSTRAINT fk_ingresso_documento_meia_entrada_id_documento FOREIGN KEY(id_documento)
         REFERENCES documento_meia_entrada (id_documento)
         ON DELETE RESTRICT ON UPDATE RESTRICT,
-    CONSTRAINT ck_ingresso_preco CHECK (preco_pago > 0),
+    CONSTRAINT ck_ingresso_ingresso_preco CHECK (preco_pago > 0),
     CONSTRAINT ck_ingresso_meia_documento CHECK ((tipo = 'Inteira' AND id_documento IS NULL) OR (tipo = 'Meia-entrada' AND id_documento IS NOT NULL))
 ) ENGINE=InnoDB
   COMMENT='RN09/RN10/RN11/RN12: venda de ingressos por assento/sessão';
@@ -223,11 +231,11 @@ CREATE TABLE ingresso_status_historico (
     data_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     id_funcionario INT UNSIGNED NULL,
     
-    CONSTRAINT pk_ingresso_status PRIMARY KEY (id_status_hist),
-    CONSTRAINT fk_status_ingresso FOREIGN KEY (id_ingresso)
+    CONSTRAINT pk_ingresso_status_historico PRIMARY KEY(id_status_hist),
+    CONSTRAINT fk_ingresso_status_historico_ingresso_id_ingresso FOREIGN KEY(id_ingresso)
         REFERENCES ingresso (id_ingresso)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_status_funcionario FOREIGN KEY (id_funcionario)
+    CONSTRAINT fk_ingresso_status_historico_funcionario_id_funcionario FOREIGN KEY(id_funcionario)
         REFERENCES funcionario (id_funcionario)
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB
@@ -243,7 +251,7 @@ CREATE TABLE produto (
     estoque_atual SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     estoque_minimo SMALLINT UNSIGNED NOT NULL DEFAULT 0,
     
-    CONSTRAINT pk_produto PRIMARY KEY (id_produto),
+    CONSTRAINT pk_produto PRIMARY KEY(id_produto),
     CONSTRAINT ck_produto_preco CHECK (preco_unitario_atual > 0)
 ) ENGINE=InnoDB
   COMMENT='RN14: catálogo e estoque de produtos da bomboniere';
@@ -255,11 +263,11 @@ CREATE TABLE produto (
     data_venda DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     valor_total DECIMAL(8,2) NOT NULL,
     
-    CONSTRAINT pk_venda PRIMARY KEY (id_venda),
-    CONSTRAINT fk_venda_cliente FOREIGN KEY (id_cliente)
+    CONSTRAINT pk_venda PRIMARY KEY(id_venda),
+    CONSTRAINT fk_venda_cliente_id_cliente FOREIGN KEY(id_cliente)
         REFERENCES cliente (id_cliente)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT fk_venda_funcionario FOREIGN KEY (id_funcionario)
+    CONSTRAINT fk_venda_funcionario_id_funcionario FOREIGN KEY(id_funcionario)
         REFERENCES funcionario (id_funcionario)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT ck_venda_valor CHECK (valor_total > 0)
@@ -272,14 +280,14 @@ CREATE INDEX idx_venda_funcionario ON venda (id_funcionario);
 CREATE TABLE venda_ingresso (
     id_venda INT UNSIGNED NOT NULL,
     id_ingresso INT UNSIGNED NOT NULL,
-    CONSTRAINT pk_venda_ingresso PRIMARY KEY (id_venda, id_ingresso),
-    CONSTRAINT fk_id_venda FOREIGN KEY (id_venda)
+    CONSTRAINT pk_venda_ingresso PRIMARY KEY(id_venda, id_ingresso),
+    CONSTRAINT fk_venda_ingresso_venda_id_venda FOREIGN KEY(id_venda)
         REFERENCES venda (id_venda)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_id_ingresso FOREIGN KEY (id_ingresso)
+    CONSTRAINT fk_venda_ingresso_ingresso_id_ingresso FOREIGN KEY(id_ingresso)
         REFERENCES ingresso (id_ingresso)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT uq_vi_ingresso UNIQUE (id_ingresso)
+    CONSTRAINT uq_venda_ingresso_id_ingresso UNIQUE(id_ingresso)
 ) ENGINE=InnoDB
   COMMENT='RN15: ingressos incluídos em cada venda (um ingresso pertence a uma única venda)';
   
@@ -290,14 +298,14 @@ CREATE TABLE venda_produto (
     quantidade SMALLINT UNSIGNED NOT NULL,
     preco_unitario_venda DECIMAL(6,2) NOT NULL,
     
-    CONSTRAINT pk_venda_produto PRIMARY KEY (id_venda_produto),
-    CONSTRAINT fk_vp_venda FOREIGN KEY (id_venda)
+    CONSTRAINT pk_venda_produto PRIMARY KEY(id_venda_produto),
+    CONSTRAINT fk_venda_produto_venda_id_venda FOREIGN KEY(id_venda)
         REFERENCES venda (id_venda)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_vp_produto FOREIGN KEY (id_produto)
+    CONSTRAINT fk_venda_produto_produto_id_produto FOREIGN KEY(id_produto)
         REFERENCES produto (id_produto)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT ck_vp_quantidade CHECK (quantidade > 0),
+    CONSTRAINT ck_venda_produto_vp_quantidade CHECK (quantidade > 0),
     CONSTRAINT ck_vp_preco CHECK (preco_unitario_venda > 0)
 ) ENGINE=InnoDB
   COMMENT='RN14/RN15: itens de bomboniere vendidos em cada venda';
@@ -309,11 +317,11 @@ CREATE TABLE venda_produto (
     valor DECIMAL(8,2) NOT NULL,
     forma_pagamento ENUM('Dinheiro','Cartao_Credito','Cartao_Debito','Pix') NOT NULL,
     
-    CONSTRAINT pk_pagamento PRIMARY KEY (id_pagamento),
-    CONSTRAINT fk_pagamento_venda FOREIGN KEY (id_venda)
+    CONSTRAINT pk_pagamento PRIMARY KEY(id_pagamento),
+    CONSTRAINT fk_pagamento_venda_id_venda FOREIGN KEY(id_venda)
         REFERENCES venda (id_venda)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT uq_pagamento_venda UNIQUE (id_venda),
+    CONSTRAINT uq_pagamento_id_venda UNIQUE(id_venda),
     CONSTRAINT ck_pagamento_valor CHECK (valor > 0)
 ) ENGINE=InnoDB
   COMMENT='RN20: pagamento de uma venda (1 pagamento por venda, nesta modelagem)';
@@ -325,14 +333,14 @@ CREATE TABLE fidelidade_pontos (
     pontos INT UNSIGNED NOT NULL,
     data_credito DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_expiracao DATETIME NOT NULL,
-    CONSTRAINT pk_fidelidade PRIMARY KEY (id_ponto),
-    CONSTRAINT fk_fidelidade_cliente FOREIGN KEY (id_cliente)
+    CONSTRAINT pk_fidelidade_pontos PRIMARY KEY(id_ponto),
+    CONSTRAINT fk_fidelidade_pontos_cliente_id_cliente FOREIGN KEY(id_cliente)
         REFERENCES cliente (id_cliente)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_fidelidade_venda FOREIGN KEY (id_venda)
+    CONSTRAINT fk_fidelidade_pontos_venda_id_venda FOREIGN KEY(id_venda)
         REFERENCES venda (id_venda)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT ck_fidelidade_pontos CHECK (pontos > 0),
+    CONSTRAINT ck_fidelidade_pontos_fidelidade_pontos CHECK (pontos > 0),
     CONSTRAINT ck_fidelidade_expiracao CHECK (data_expiracao > data_credito)
 ) ENGINE=InnoDB
   COMMENT='RN19: pontos de fidelidade por venda, com expiração em 12 meses';

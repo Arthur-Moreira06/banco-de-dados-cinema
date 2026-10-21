@@ -34,7 +34,7 @@ public class CatalogoCadastros {
                 c("id_filme_relacionado", "ID do filme relacionado (opcional)", "number", false),
                 s("tipo_relacao", "Tipo de relação (opcional)", false, "Sequencia", "Preludio"))));
         adicionar(new CadastroDefinicao("salas", "Salas", "sala", "id_sala",
-                "SELECT id_sala AS id, numero, capacidade, tipo_projecao FROM sala ORDER BY numero",
+                "SELECT id_sala AS id, numero, capacidade, tipo_projecao FROM sala ORDER BY CAST(numero AS UNSIGNED), id_sala",
                 List.of("numero", "capacidade", "tipo_projecao"), List.of(
                 c("numero", "Número/nome", "text", true), c("capacidade", "Capacidade", "number", true),
                 s("tipo_projecao", "Projeção", true, "2D", "3D", "IMAX"))));
