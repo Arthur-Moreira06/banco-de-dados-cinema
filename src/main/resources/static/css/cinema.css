@@ -268,6 +268,39 @@ tbody tr:last-child td { border-bottom: 0; }
 .ticket-form .field > select { height: 48px; }
 .ticket-form .field > small { align-self: start; line-height: 18px; }
 .ticket-form button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.ticket-step { grid-column: 1 / -1; min-width: 0; }
+.ticket-step[hidden] { display: none !important; }
+.seat-map[hidden], .form-actions[hidden], .seat-selection[hidden] { display: none !important; }
+.ticket-step-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); align-items: start; gap: 22px; }
+.ticket-step-main { min-width: 0; }
+.ticket-side-panel { position: sticky; top: 22px; display: grid; gap: 18px; padding: 20px; background: var(--input); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 24px #00000012; }
+.ticket-side-panel__top, .ticket-side-panel__items { display: grid; gap: 8px; }
+.ticket-side-panel__top .eyebrow { color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .1em; }
+.ticket-side-panel__top > span:not(.eyebrow), .ticket-side-empty { color: var(--muted); font-size: 13px; }
+.ticket-side-panel__items > strong { font-size: 14px; }
+.ticket-side-panel__items ul { display: grid; gap: 8px; max-height: 210px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+.ticket-side-panel__items li { font-size: 13px; line-height: 1.4; }
+.ticket-side-panel__total { display: flex; justify-content: space-between; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border); }
+.ticket-side-panel__total strong { font-size: 19px; white-space: nowrap; }
+.ticket-side-panel__actions { display: grid; gap: 10px; }
+.ticket-side-panel__actions > button { width: 100%; justify-content: center; }
+.ticket-checkout-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ticket-step-heading { margin: 8px 0 18px; }
+.ticket-step-heading h2 { margin: 6px 0; }
+.ticket-step-heading p { margin: 0; color: var(--muted); }
+.ticket-product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ticket-product-photo { background-color: var(--subtle); }
+.ticket-product-card .product-card__content { min-height: 106px; }
+.ticket-product-card .product-card__footer { align-items: center; }
+.ticket-order-summary { display: grid; gap: 18px; padding: 20px; background: var(--input); border: 1px solid var(--border); border-radius: 12px; }
+.ticket-order-summary > div { display: grid; gap: 7px; }
+.ticket-order-summary .eyebrow { color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .1em; }
+.ticket-order-summary ul { margin: 0; padding-left: 20px; }
+.ticket-order-summary li { margin: 5px 0; }
+.ticket-order-total { grid-template-columns: 1fr auto; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
+.ticket-order-total strong, .ticket-checkout-total strong { font-size: 21px; }
+.ticket-checkout-total { grid-column: 1 / -1; margin: 0; padding: 16px; background: var(--subtle); border-radius: 10px; }
+.ticket-step[data-ticket-step="checkout"] { display: block; }
 .seat-empty { color: var(--muted); text-align: center; }
 
 .ticket-program { max-width: 1180px; }
@@ -394,6 +427,8 @@ tbody tr:last-child td { border-bottom: 0; }
   .sales-chart-heading { align-items: flex-start; flex-direction: column; }
   .sales-chart-row { grid-template-columns: 1fr; gap: 8px; }
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .ticket-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .ticket-checkout-fields { grid-template-columns: 1fr; }
   .product-card__content { padding: 12px 12px 8px; }
   .product-card__footer { align-items: flex-start; flex-direction: column; }
   .purchase-panel { padding: 18px; }
@@ -401,6 +436,11 @@ tbody tr:last-child td { border-bottom: 0; }
   .product-purchase-form { grid-template-columns: 1fr; }
   .product-purchase-form .form-actions { justify-content: stretch; }
   .product-purchase-form .form-actions button { width: 100%; }
+}
+
+@media (max-width: 850px) {
+  .ticket-step-layout { grid-template-columns: 1fr; }
+  .ticket-side-panel { position: static; }
 }
 
 @media (max-width: 390px) {

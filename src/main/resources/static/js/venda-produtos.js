@@ -244,6 +244,12 @@
                                                 : "outro-08-wrap-vegetais"
     }
   };
+  window.cinemaProductImage = (category, productName) => {
+    const key = String(productName || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const catalog = photoCatalog[category] || photoCatalog.Outro;
+    return `/css/${catalog.products[key] ?? catalog.fallback(key)}.png?v=8`;
+  };
+  if (!document.querySelector("#product-purchase-form")) return;
   const sourceImageSize = 1254;
   const sourceCellSize = 410;
   const sourceCellStep = 422;
@@ -259,8 +265,7 @@
     const name = card.dataset.productName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const catalog = photoCatalog[category];
     if (["Pipoca", "Bebida", "Doce", "Combo", "Outro"].includes(category)) {
-      const image = catalog.products[name] ?? catalog.fallback(name);
-      return { image: `/css/${image}.png?v=7`, direct: true };
+      return { image: window.cinemaProductImage(category, card.dataset.productName), direct: true };
     }
     const tile = catalog.products[name] ?? catalog.fallback(name);
     return { image: catalog.src, row: Math.floor(tile / 3), column: tile % 3 };

@@ -3,7 +3,7 @@
   if (!form) return;
   const hidden = form.querySelector("#assentoId");
   const status = form.querySelector("[data-seat-selection]");
-  const submit = form.querySelector("[data-submit-seat]");
+  const submit = form.querySelector("[data-next-products]");
   document.querySelectorAll(".seat.available").forEach(seat => {
     seat.addEventListener("click", () => {
       document.querySelectorAll(".seat.selected").forEach(item => item.classList.remove("selected"));

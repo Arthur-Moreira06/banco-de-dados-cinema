@@ -61,6 +61,7 @@ public class OperacaoFuncionarioController {
         model.addAttribute("filmesProgramacao", agruparProgramacao(consultas.filmesComSessoes()));
         model.addAttribute("sessaoSelecionada", sessaoId);
         model.addAttribute("detalhesSessao", sessaoId == null ? null : consultas.detalhesSessao(sessaoId));
+        model.addAttribute("produtosDisponiveis", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto WHERE estoque_atual>0 ORDER BY categoria,nome"));
         List<Map<String,Object>> assentos = new ArrayList<>();
         Map<String,List<Map<String,Object>>> fileiras = new LinkedHashMap<>();
         if (sessaoId != null) {
@@ -94,11 +95,20 @@ public class OperacaoFuncionarioController {
     @PostMapping("/vendas-ingressos")
     public String venderIngresso(@RequestParam int sessaoId, @RequestParam int assentoId,
             @RequestParam int clienteId, @RequestParam(required=false) Integer documentoId,
-            @RequestParam String tipo, @RequestParam String pagamento, HttpSession session, RedirectAttributes flash) {
+            @RequestParam String tipo, @RequestParam String pagamento, @RequestParam Map<String,String> parametros,
+            HttpSession session, RedirectAttributes flash) {
         UsuarioAutenticado usuario = (UsuarioAutenticado) session.getAttribute("usuario");
         try {
-            vendas.venderIngresso(sessaoId, assentoId, clienteId, documentoId, tipo, usuario.id(), pagamento);
-            flash.addFlashAttribute("sucesso", "Ingresso vendido com sucesso.");
+            Map<Integer,Integer> produtos = new LinkedHashMap<>();
+            parametros.forEach((chave, valor) -> {
+                if (chave.startsWith("produto_")) {
+                    int produtoId = Integer.parseInt(chave.substring("produto_".length()));
+                    int quantidade = Integer.parseInt(valor);
+                    if (quantidade > 0) produtos.put(produtoId, quantidade);
+                }
+            });
+            vendas.venderIngresso(sessaoId, assentoId, clienteId, documentoId, tipo, usuario.id(), pagamento, produtos);
+            flash.addFlashAttribute("sucesso", "Pedido finalizado com sucesso.");
         } catch (Exception e) {
             flash.addFlashAttribute("erro", mensagem(e));
         }

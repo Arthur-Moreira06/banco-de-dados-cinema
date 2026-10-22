@@ -102,7 +102,10 @@ public class ConsultaWebRepository {
         return jdbc.queryForMap("""
                 SELECT f.titulo_original AS titulo, f.sinopse,
                        f.genero_principal AS genero, f.classificacao_indicativa AS classificacao,
-                       s.data_sessao AS data, s.horario_inicio AS horario, s.idioma, s.tipo, sa.numero AS sala
+                       s.data_sessao AS data, s.horario_inicio AS horario, s.idioma, s.tipo, sa.numero AS sala,
+                       (SELECT ph.preco_base FROM sessao_preco_historico ph
+                        WHERE ph.id_sessao=s.id_sessao AND ph.vigencia_inicio<=NOW()
+                        ORDER BY ph.vigencia_inicio DESC,ph.id_preco DESC LIMIT 1) AS preco
                 FROM sessao s JOIN filme f ON f.id_filme=s.id_filme
                 JOIN sala sa ON sa.id_sala=s.id_sala
                 WHERE s.id_sessao=?
