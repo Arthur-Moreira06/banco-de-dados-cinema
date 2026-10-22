@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Consultas | Cinema</title>
-  <link rel="stylesheet" th:href="@{/css/cinema.css}">
+  <link rel="stylesheet" th:href="@{/css/cinema.css(v=6)}">
   <script defer th:src="@{/js/tema.js}"></script>
 </head>
 <body>
@@ -19,6 +19,8 @@
   </nav>
   <form class="filter-bar" method="get" action="/funcionario/consultas">
     <input type="hidden" name="tipo" th:value="${tipo}">
+    <input th:if="${tipo == 'produtos' or tipo == 'sessoes' or tipo == 'relatorio'}" type="hidden" name="ordem" th:value="${ordem}">
+    <input th:if="${tipo == 'produtos' or tipo == 'sessoes' or tipo == 'relatorio'}" type="hidden" name="direcao" th:value="${direcao}">
     <label>De <input type="date" name="inicio" th:value="${inicio}"></label>
     <label>Até <input type="date" name="fim" th:value="${fim}"></label>
     <label th:if="${tipo == 'sessoes'}">Filme <select name="filme"><option value="">Todos</option><option th:each="f : ${filmes}" th:value="${f.id}" th:text="${f.titulo}" th:selected="${filmeSelecionado == f.id.toString()}"></option></select></label>
@@ -40,7 +42,14 @@
   </section>
 
   <div class="table-wrap" th:if="${tipo != 'geral'}">
-    <table><thead><tr><th th:each="coluna : ${colunas}" th:text="${coluna}">Coluna</th></tr></thead>
+    <table><thead><tr><th th:each="coluna : ${colunas}"
+        th:attr="aria-sort=${(tipo == 'produtos' or tipo == 'sessoes' or tipo == 'relatorio') and ordem == coluna ? (direcao == 'asc' ? 'ascending' : 'descending') : 'none'}">
+        <a class="sortable-heading" th:if="${tipo == 'produtos' or tipo == 'sessoes' or tipo == 'relatorio'}"
+           th:href="@{/funcionario/consultas(tipo=${tipo},inicio=${inicio},fim=${fim},categoria=${categoriaSelecionada},filme=${filmeSelecionado},ordem=${coluna},direcao=${ordem == coluna ? (direcao == 'asc' ? 'desc' : 'asc') : 'asc'})}">
+          <span th:text="${coluna}">Coluna</span><span class="sort-indicator" aria-hidden="true" th:text="${ordem == coluna ? (direcao == 'asc' ? '↑' : '↓') : '↕'}">↕</span>
+        </a>
+        <span th:unless="${tipo == 'produtos' or tipo == 'sessoes' or tipo == 'relatorio'}" th:text="${coluna}">Coluna</span>
+      </th></tr></thead>
       <tbody>
         <tr th:if="${#lists.isEmpty(linhas)}"><td class="empty" th:colspan="${#lists.size(colunas)}" th:text="${tipo == 'produtos' ? 'Nenhum produto foi vendido nesse período.' : (tipo == 'sessoes' ? 'Nenhum ingresso foi vendido nesse período.' : 'Nenhum resultado nesse período.')}">Nenhum resultado nesse período.</td></tr>
         <tr th:each="linha : ${linhas}"><td th:each="coluna : ${colunas}" th:text="${linha.get(#vars.coluna)}">valor</td></tr>

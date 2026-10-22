@@ -119,6 +119,7 @@ public class OperacaoFuncionarioController {
     public String consultas(@RequestParam(defaultValue="sessoes") String tipo,
             @RequestParam(required=false) String inicio, @RequestParam(required=false) String fim,
             @RequestParam(defaultValue="") String filme, @RequestParam(defaultValue="Todas") String categoria,
+            @RequestParam(defaultValue="") String ordem, @RequestParam(defaultValue="") String direcao,
             Model model, HttpSession session) {
         LocalDate hoje = LocalDate.now();
         if (inicio == null || inicio.isBlank()) inicio = hoje.withDayOfMonth(1).toString();
@@ -149,12 +150,24 @@ public class OperacaoFuncionarioController {
             categoria = "Todas";
             erroConsulta = "A categoria informada é inválida.";
         }
+        List<String> colunasOrdenaveis = switch (tipo) {
+            case "produtos" -> List.of("id", "nome", "categoria", "unidades", "faturamento");
+            case "relatorio" -> List.of("id", "data", "horario", "filme", "capacidade", "ingressos", "ocupacao_percentual", "receita");
+            case "sessoes" -> List.of("id", "data", "horario", "filme", "ingressos", "receita");
+            default -> List.of();
+        };
+        String ordemPadrao = tipo.equals("produtos") ? "faturamento" : "data";
+        if (!colunasOrdenaveis.contains(ordem)) ordem = ordemPadrao;
+        direcao = direcao.toLowerCase();
+        if (!List.of("asc", "desc").contains(direcao)) direcao = tipo.equals("produtos") ? "desc" : "asc";
         model.addAttribute("usuario", session.getAttribute("usuario"));
         model.addAttribute("tipo", tipo);
         model.addAttribute("inicio", inicio);
         model.addAttribute("fim", fim);
         model.addAttribute("filmeSelecionado", filme);
         model.addAttribute("categoriaSelecionada", categoria);
+        model.addAttribute("ordem", ordem);
+        model.addAttribute("direcao", direcao);
         model.addAttribute("erroConsulta", erroConsulta);
         model.addAttribute("filmes", consultas.filmes());
         model.addAttribute("categorias", List.of("Todas", "Pipoca", "Bebida", "Doce", "Combo", "Outro"));
@@ -167,19 +180,21 @@ public class OperacaoFuncionarioController {
                     ? List.of("id", "nome", "categoria", "unidades", "faturamento")
                     : tipo.equals("sessoes")
                     ? List.of("id", "data", "horario", "filme", "ingressos", "receita")
+                    : tipo.equals("relatorio")
+                    ? List.of("id", "data", "horario", "filme", "capacidade", "ingressos", "ocupacao_percentual", "receita")
                     : List.of();
         } else if (tipo.equals("geral")) {
             linhas = List.of();
             colunas = List.of();
             grafico = prepararGrafico(consultas.graficoVendasGerais(inicio, fim));
         } else if (tipo.equals("produtos")) {
-            linhas = consultas.produtos(inicio, fim, categoria);
+            linhas = consultas.produtos(inicio, fim, categoria, ordem, direcao);
             colunas = List.of("id", "nome", "categoria", "unidades", "faturamento");
         } else if (tipo.equals("relatorio")) {
-            linhas = consultas.relatorio();
-            colunas = linhas.isEmpty() ? List.of() : List.copyOf(linhas.getFirst().keySet());
+            linhas = consultas.relatorio(ordem, direcao);
+            colunas = List.of("id", "data", "horario", "filme", "capacidade", "ingressos", "ocupacao_percentual", "receita");
         } else {
-            linhas = consultas.sessoes(inicio, fim, filme);
+            linhas = consultas.sessoes(inicio, fim, filme, ordem, direcao);
             colunas = List.of("id", "data", "horario", "filme", "ingressos", "receita");
             tipo = "sessoes";
         }

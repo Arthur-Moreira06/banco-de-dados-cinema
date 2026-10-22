@@ -13,9 +13,18 @@ public class ConsultaWebRepository {
     private final JdbcTemplate jdbc;
     public ConsultaWebRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
-    public List<Map<String,Object>> sessoes(String inicio, String fim, String filme) {
+    public List<Map<String,Object>> sessoes(String inicio, String fim, String filme, String ordem, String direcao) {
         Date dataInicial = Date.valueOf(LocalDate.parse(inicio));
         Date dataFinal = Date.valueOf(LocalDate.parse(fim));
+        String campoOrdenacao = switch (ordem) {
+            case "id" -> "s.id_sessao";
+            case "data" -> "s.data_sessao";
+            case "horario" -> "s.horario_inicio";
+            case "filme" -> "f.titulo_original";
+            case "ingressos" -> "ingressos";
+            default -> "receita";
+        };
+        String sentidoOrdenacao = "asc".equalsIgnoreCase(direcao) ? "ASC" : "DESC";
         return jdbc.queryForList("""
                 SELECT s.id_sessao AS id, s.data_sessao AS data, s.horario_inicio AS horario,
                        f.titulo_original AS filme, COUNT(i.id_ingresso) AS ingressos,
@@ -33,13 +42,21 @@ public class ConsultaWebRepository {
                       LIMIT 1
                   ), 'Reservado') IN ('Pago','Utilizado')
                 GROUP BY s.id_sessao,s.data_sessao,s.horario_inicio,f.titulo_original
-                ORDER BY s.data_sessao,s.horario_inicio
-                """, dataInicial, dataFinal, filme, filme.isBlank() ? null : Integer.valueOf(filme));
+                ORDER BY %s %s,s.id_sessao ASC
+                """.formatted(campoOrdenacao, sentidoOrdenacao), dataInicial, dataFinal, filme, filme.isBlank() ? null : Integer.valueOf(filme));
     }
 
-    public List<Map<String,Object>> produtos(String inicio, String fim, String categoria) {
+    public List<Map<String,Object>> produtos(String inicio, String fim, String categoria, String ordem, String direcao) {
         Date dataInicial = Date.valueOf(LocalDate.parse(inicio));
         Date dataFinal = Date.valueOf(LocalDate.parse(fim));
+        String campoOrdenacao = switch (ordem) {
+            case "id" -> "p.id_produto";
+            case "nome" -> "p.nome";
+            case "categoria" -> "p.categoria";
+            case "unidades" -> "unidades";
+            default -> "faturamento";
+        };
+        String sentidoOrdenacao = "asc".equalsIgnoreCase(direcao) ? "ASC" : "DESC";
         return jdbc.queryForList("""
                 SELECT p.id_produto AS id,p.nome,p.categoria,
                        SUM(vp.quantidade) AS unidades,
@@ -50,8 +67,8 @@ public class ConsultaWebRepository {
                 JOIN produto p ON p.id_produto=vp.id_produto
                 WHERE DATE(pg.data_pagamento) BETWEEN ? AND ?
                   AND (?='Todas' OR p.categoria=?)
-                GROUP BY p.id_produto,p.nome,p.categoria ORDER BY faturamento DESC
-                """, dataInicial, dataFinal, categoria, categoria);
+                GROUP BY p.id_produto,p.nome,p.categoria ORDER BY %s %s,p.id_produto ASC
+                """.formatted(campoOrdenacao, sentidoOrdenacao), dataInicial, dataFinal, categoria, categoria);
     }
 
     public List<Map<String,Object>> graficoVendasGerais(String inicio, String fim) {
@@ -112,7 +129,18 @@ public class ConsultaWebRepository {
                 """, sessaoId);
     }
 
-    public List<Map<String,Object>> relatorio() {
+    public List<Map<String,Object>> relatorio(String ordem, String direcao) {
+        String campoOrdenacao = switch (ordem) {
+            case "id" -> "s.id_sessao";
+            case "data" -> "s.data_sessao";
+            case "horario" -> "s.horario_inicio";
+            case "filme" -> "f.titulo_original";
+            case "capacidade" -> "sa.capacidade";
+            case "ingressos" -> "ingressos";
+            case "ocupacao_percentual" -> "ocupacao_percentual";
+            default -> "receita";
+        };
+        String sentidoOrdenacao = "asc".equalsIgnoreCase(direcao) ? "ASC" : "DESC";
         return jdbc.queryForList("""
                 WITH status_recente AS (
                     SELECT h.id_ingresso, h.status,
@@ -142,8 +170,8 @@ public class ConsultaWebRepository {
                 JOIN filme f ON f.id_filme = s.id_filme
                 JOIN sala sa ON sa.id_sala = s.id_sala
                 LEFT JOIN vendas_sessao vs ON vs.id_sessao = s.id_sessao
-                ORDER BY s.data_sessao, s.horario_inicio
-                """);
+                ORDER BY %s %s,s.id_sessao ASC
+                """.formatted(campoOrdenacao, sentidoOrdenacao));
     }
     public List<Map<String,Object>> filmes() { return jdbc.queryForList("SELECT id_filme AS id,titulo_original AS titulo FROM filme ORDER BY titulo_original"); }
 }
