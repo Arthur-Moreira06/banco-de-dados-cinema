@@ -36,7 +36,7 @@ public class OperacaoFuncionarioController {
     @GetMapping("/vendas-produtos")
     public String formularioProdutos(Model model, HttpSession session) {
         model.addAttribute("usuario", session.getAttribute("usuario"));
-        model.addAttribute("produtos", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto WHERE estoque_atual>0 ORDER BY categoria,nome"));
+        model.addAttribute("produtos", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto ORDER BY categoria,nome"));
         model.addAttribute("clientes", jdbc.queryForList("SELECT id_cliente AS id,nome FROM cliente ORDER BY nome"));
         return "venda-produtos";
     }
@@ -61,7 +61,7 @@ public class OperacaoFuncionarioController {
         model.addAttribute("filmesProgramacao", agruparProgramacao(consultas.filmesComSessoes()));
         model.addAttribute("sessaoSelecionada", sessaoId);
         model.addAttribute("detalhesSessao", sessaoId == null ? null : consultas.detalhesSessao(sessaoId));
-        model.addAttribute("produtosDisponiveis", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto WHERE estoque_atual>0 ORDER BY categoria,nome"));
+        model.addAttribute("produtosDisponiveis", jdbc.queryForList("SELECT id_produto AS id,nome,categoria,preco_unitario_atual AS preco,estoque_atual AS estoque FROM produto ORDER BY categoria,nome"));
         List<Map<String,Object>> assentos = new ArrayList<>();
         Map<String,List<Map<String,Object>>> fileiras = new LinkedHashMap<>();
         if (sessaoId != null) {

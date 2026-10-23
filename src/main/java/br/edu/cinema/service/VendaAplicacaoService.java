@@ -21,12 +21,13 @@ public class VendaAplicacaoService {
     @Transactional
     public void venderProduto(int produtoId, int quantidade, Integer clienteId, int funcionarioId, String pagamento) {
         if (quantidade < 1) throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
-        Map<String,Object> produto = jdbc.queryForMap("SELECT preco_unitario_atual,estoque_atual FROM produto WHERE id_produto=? FOR UPDATE", produtoId);
+        Map<String,Object> produto = jdbc.queryForMap("SELECT nome,preco_unitario_atual,estoque_atual FROM produto WHERE id_produto=? FOR UPDATE", produtoId);
         BigDecimal preco = (BigDecimal) produto.get("preco_unitario_atual");
         int estoque = ((Number)produto.get("estoque_atual")).intValue();
-        if (estoque < quantidade) throw new IllegalArgumentException("Estoque insuficiente.");
+        if (estoque <= 0) throw new IllegalArgumentException("Produto " + produto.get("nome") + " está esgotado. Atualize a página para ver a disponibilidade.");
+        if (estoque < quantidade) throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ". Disponível: " + estoque + ".");
         if (jdbc.update("UPDATE produto SET estoque_atual=estoque_atual-? WHERE id_produto=? AND estoque_atual>=?", quantidade, produtoId, quantidade) != 1)
-            throw new IllegalArgumentException("Estoque insuficiente.");
+            throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ". Atualize a página para ver a disponibilidade.");
         BigDecimal total = preco.multiply(BigDecimal.valueOf(quantidade));
         int vendaId = inserirId("INSERT INTO venda(id_cliente,id_funcionario,valor_total) VALUES(?,?,?)", clienteId, funcionarioId, total);
         jdbc.update("INSERT INTO venda_produto(id_venda,id_produto,quantidade,preco_unitario_venda) VALUES(?,?,?,?)", vendaId, produtoId, quantidade, preco);
@@ -59,11 +60,12 @@ public class VendaAplicacaoService {
             Map<String,Object> produto = jdbc.queryForMap(
                     "SELECT nome,preco_unitario_atual,estoque_atual FROM produto WHERE id_produto=? FOR UPDATE", item.getKey());
             int estoque = ((Number) produto.get("estoque_atual")).intValue();
-            if (estoque < quantidade) throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ".");
+            if (estoque <= 0) throw new IllegalArgumentException("Produto " + produto.get("nome") + " está esgotado. Atualize a página para ver a disponibilidade.");
+            if (estoque < quantidade) throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ". Disponível: " + estoque + ".");
             BigDecimal preco = (BigDecimal) produto.get("preco_unitario_atual");
             if (jdbc.update("UPDATE produto SET estoque_atual=estoque_atual-? WHERE id_produto=? AND estoque_atual>=?",
                     quantidade, item.getKey(), quantidade) != 1) {
-                throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ".");
+                throw new IllegalArgumentException("Estoque insuficiente para " + produto.get("nome") + ". Atualize a página para ver a disponibilidade.");
             }
             produto.put("quantidade", quantidade);
             produtos.put(item.getKey(), produto);

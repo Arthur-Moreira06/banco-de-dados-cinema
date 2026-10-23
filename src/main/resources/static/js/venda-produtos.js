@@ -298,6 +298,7 @@
   }
 
   function selectProduct(card) {
+    if (Number(card.dataset.stock) <= 0) return;
     selectedCard = card;
     productId.value = card.dataset.productId;
     const quantity = quantityFor(card);

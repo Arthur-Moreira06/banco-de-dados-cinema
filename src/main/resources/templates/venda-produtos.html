@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Venda de produtos | Cinema</title>
-  <link rel="stylesheet" th:href="@{/css/cinema.css(v=2)}">
+  <link rel="stylesheet" th:href="@{/css/cinema.css(v=9)}">
   <script defer th:src="@{/js/tema.js}"></script>
-  <script defer th:src="@{/js/venda-produtos.js(v=7)}"></script>
+  <script defer th:src="@{/js/venda-produtos.js(v=8)}"></script>
 </head>
 <body>
 <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
@@ -33,27 +33,27 @@
   </nav>
 
   <section class="product-grid" aria-label="Produtos disponíveis">
-    <article class="product-card" th:each="p : ${produtos}"
+    <article class="product-card" th:each="p : ${produtos}" th:classappend="${p.estoque <= 0 ? 'is-unavailable' : ''}"
              th:attr="data-category=${p.categoria},data-product-id=${p.id},data-product-name=${p.nome},data-product-price=${p.preco},data-stock=${p.estoque}">
-      <button class="product-card__select" type="button" th:attr="aria-label=|Selecionar ${p.nome} para compra|">
+      <button class="product-card__select" type="button" th:disabled="${p.estoque <= 0}" th:attr="aria-label=${p.estoque <= 0 ? p.nome + ' esgotado' : 'Selecionar ' + p.nome + ' para compra'}">
         <span class="product-photo" th:classappend="|product-photo--${#strings.toLowerCase(p.categoria)}|" aria-hidden="true"></span>
         <span class="product-card__content">
           <span class="product-card__category" th:text="${p.categoria}">Categoria</span>
           <strong class="product-card__name" th:text="${p.nome}">Produto</strong>
           <span class="product-card__price" th:text="|R$ ${#numbers.formatDecimal(p.preco,1,2)}|">R$ 0,00</span>
         </span>
-        <span class="product-card__cta">Escolher produto <span aria-hidden="true">→</span></span>
+        <span class="product-card__cta"><span th:text="${p.estoque <= 0 ? 'Esgotado' : 'Escolher produto'}">Escolher produto</span><span aria-hidden="true" th:if="${p.estoque > 0}">→</span></span>
       </button>
       <div class="product-card__footer">
-        <span class="stock-label" th:text="|${p.estoque} disponíveis|">Estoque</span>
+        <span class="stock-label" th:text="${p.estoque <= 0 ? 'Esgotado' : p.estoque + ' disponíveis'}">Estoque</span>
         <div class="quantity-control" th:attr="data-quantity-control=${p.id}">
-          <button type="button" class="quantity-step" data-step="-1" th:attr="aria-label=|Diminuir quantidade de ${p.nome}|">−</button>
-          <output class="quantity-value" aria-live="polite">1</output>
-          <button type="button" class="quantity-step" data-step="1" th:attr="aria-label=|Aumentar quantidade de ${p.nome}|">+</button>
+          <button type="button" class="quantity-step" data-step="-1" th:disabled="${p.estoque <= 0}" th:attr="aria-label=|Diminuir quantidade de ${p.nome}|">−</button>
+          <output class="quantity-value" aria-live="polite" th:text="${p.estoque > 0 ? 1 : 0}">1</output>
+          <button type="button" class="quantity-step" data-step="1" th:disabled="${p.estoque <= 0}" th:attr="aria-label=|Aumentar quantidade de ${p.nome}|">+</button>
         </div>
       </div>
     </article>
-    <p class="product-empty" th:if="${#lists.isEmpty(produtos)}">Não há produtos disponíveis no estoque.</p>
+    <p class="product-empty" th:if="${#lists.isEmpty(produtos)}">Não há produtos cadastrados.</p>
   </section>
 
   <section class="purchase-panel" id="purchase-section" aria-labelledby="purchase-title">

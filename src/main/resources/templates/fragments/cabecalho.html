@@ -4,6 +4,16 @@
 <header class="topbar" th:fragment="cabecalho">
   <a class="brand" th:href="@{/}">CINEMA</a>
   <nav class="top-actions" aria-label="Conta e aparência">
+    <div class="notification-menu" data-notification-menu th:if="${usuario.gerente()}" th:attr="data-manager-id=${usuario.id()}">
+      <button class="notification-toggle" type="button" data-notification-toggle aria-expanded="false" aria-controls="manager-notifications" aria-label="Notificações">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+        <span class="notification-badge" data-notification-badge hidden></span>
+      </button>
+      <section class="notification-panel" id="manager-notifications" data-notification-panel hidden aria-label="Notificações de vendas">
+        <div class="notification-panel__heading"><strong>Vendas recentes</strong><span data-notification-caption>Últimas vendas registradas</span></div>
+        <ol class="notification-list" data-notification-list aria-live="polite"><li class="notification-empty">Carregando vendas…</li></ol>
+      </section>
+    </div>
     <div class="user-menu" data-user-menu>
       <button class="user-trigger" type="button" data-user-menu-toggle aria-expanded="false" aria-haspopup="true">
         <span class="user-avatar" aria-hidden="true" th:text="${usuario.iniciais()}">AG</span>
@@ -22,6 +32,7 @@
     </div>
   </nav>
   <script defer th:src="@{/js/menu-usuario.js}"></script>
+  <script defer th:src="@{/js/notificacoes-gerente.js(v=1)}"></script>
 </header>
 </body>
 </html>

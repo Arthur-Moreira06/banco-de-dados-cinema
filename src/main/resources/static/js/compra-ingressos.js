@@ -102,6 +102,7 @@
     const quantity = card.querySelector("[data-product-quantity]");
     const hiddenInput = card.querySelector("[data-product-input]");
     card.querySelectorAll("[data-product-step]").forEach(button => button.addEventListener("click", () => {
+      if (Number(card.dataset.stock) <= 0) return;
       const next = Math.max(0, Math.min(Number(card.dataset.stock), quantityOf(card) + Number(button.dataset.productStep)));
       quantity.dataset.productQuantity = String(next);
       quantity.textContent = String(next);
