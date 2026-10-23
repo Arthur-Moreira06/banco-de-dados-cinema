@@ -13,7 +13,7 @@ public class AcessoInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
         String path = request.getRequestURI();
-        if (path.equals("/login") || path.startsWith("/css/") || path.startsWith("/js/")
+        if (path.equals("/login") || path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/images/")
                 || path.equals("/favicon.ico") || path.equals("/error")) return true;
         HttpSession session = request.getSession(false);
         UsuarioAutenticado usuario = session == null ? null : (UsuarioAutenticado) session.getAttribute("usuario");

@@ -68,22 +68,22 @@ INSERT INTO documento_meia_entrada (id_cliente, tipo_documento, numero_documento
 (3, 'Estudante', 'CE-2026-004521', '2026-12-20'),
 (5, 'Idoso', 'RG-IDOSO-778899', NULL);
 
--- sessao ja ocorrida (10/09), usada para demonstrar status "Utilizado"
+-- sessao ocorrida em outubro, com status "Utilizado" apos a exibicao
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(1, 1, '2026-09-10', '14:00:00', 'Dublado', '2D');
+(1, 1, '2026-10-10', '14:00:00', 'Dublado', '2D');
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(1, 1, '2026-09-25', '14:00:00', 'Dublado', '2D');
--- sessao futura sem nenhum ingresso vendido ainda (situacao em aberto)
+(1, 1, '2026-11-25', '14:00:00', 'Dublado', '2D');
+-- sessao futura ainda sem ingresso pago (situacao em aberto)
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(3, 1, '2026-09-26', '10:00:00', 'Legendado', '2D');
+(3, 1, '2026-11-26', '10:00:00', 'Legendado', '2D');
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(2, 2, '2026-09-25', '18:00:00', 'Dublado', '3D');
+(2, 2, '2026-11-25', '18:00:00', 'Dublado', '3D');
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(4, 3, '2026-09-25', '21:00:00', 'Legendado', 'IMAX');
+(4, 3, '2026-11-25', '21:00:00', 'Legendado', 'IMAX');
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(5, 2, '2026-09-26', '15:00:00', 'Dublado', '3D');
+(5, 2, '2026-11-26', '15:00:00', 'Dublado', '3D');
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
-(1, 3, '2026-09-27', '20:00:00', 'Original', 'IMAX');
+(1, 3, '2026-11-27', '20:00:00', 'Original', 'IMAX');
 
 INSERT INTO sessao_preco_historico (id_sessao, preco_base, vigencia_inicio) VALUES
 (1, 26.00, '2026-08-15 00:00:00'),
@@ -99,67 +99,67 @@ INSERT INTO sessao_preco_historico (id_sessao, preco_base, vigencia_inicio) VALU
 
 -- T1: sessao ja ocorrida, cliente adulto, ingresso inteiro, ciclo completo ate Utilizado
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(1, 1, 1, NULL, 'Inteira', 28.00, '2026-09-09 18:00:00');
+(1, 1, 1, NULL, 'Inteira', 28.00, '2026-10-09 18:00:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(1, 'Reservado', '2026-09-09 18:00:00', 1),
-(1, 'Pago',      '2026-09-09 18:05:00', 1),
-(1, 'Utilizado', '2026-09-10 14:10:00', NULL);
+(1, 'Reservado', '2026-10-09 18:00:00', 1),
+(1, 'Pago',      '2026-10-09 18:05:00', 1),
+(1, 'Utilizado', '2026-10-10 14:10:00', NULL);
 
 -- T2: sessao ja ocorrida, meia-entrada (idoso), ciclo completo ate Utilizado
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(1, 2, 5, 2, 'Meia-entrada', 14.00, '2026-09-09 18:00:00');
+(1, 2, 5, 2, 'Meia-entrada', 14.00, '2026-10-09 18:00:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(2, 'Reservado', '2026-09-09 18:00:00', 2),
-(2, 'Pago',      '2026-09-09 18:05:00', 2),
-(2, 'Utilizado', '2026-09-10 14:10:00', NULL);
+(2, 'Reservado', '2026-10-09 18:00:00', 2),
+(2, 'Pago',      '2026-10-09 18:05:00', 2),
+(2, 'Utilizado', '2026-10-10 14:10:00', NULL);
 
 -- T3: sessao futura, cliente adolescente (16 anos, classificacao 14 ok), APENAS reservado (situacao em aberto)
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(2, 6, 2, NULL, 'Inteira', 30.00, '2026-09-17 10:00:00');
+(2, 6, 2, NULL, 'Inteira', 30.00, '2026-10-17 10:00:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(3, 'Reservado', '2026-09-17 10:00:00', 1);
+(3, 'Reservado', '2026-10-17 10:00:00', 1);
 
 -- T4: sessao futura, meia-entrada (estudante), paga
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(2, 7, 3, 1, 'Meia-entrada', 15.00, '2026-09-16 10:00:00');
+(2, 7, 3, 1, 'Meia-entrada', 15.00, '2026-10-16 10:00:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(4, 'Reservado', '2026-09-16 10:00:00', 2),
-(4, 'Pago',      '2026-09-16 10:10:00', 2);
+(4, 'Reservado', '2026-10-16 10:00:00', 2),
+(4, 'Pago',      '2026-10-16 10:10:00', 2);
 
 -- T5: sequencia (Filme 2), inteira, paga
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(4, 11, 1, NULL, 'Inteira', 40.00, '2026-09-16 08:55:00');
+(4, 11, 1, NULL, 'Inteira', 40.00, '2026-10-16 08:55:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(5, 'Reservado', '2026-09-16 08:55:00', 3),
-(5, 'Pago',      '2026-09-16 09:00:00', 3);
+(5, 'Reservado', '2026-10-16 08:55:00', 3),
+(5, 'Pago',      '2026-10-16 09:00:00', 3);
 
 -- T6: sequencia (Filme 2), meia-entrada (idoso), paga e depois cancelada dentro do prazo do RN18
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(4, 12, 5, 2, 'Meia-entrada', 20.00, '2026-09-16 09:10:00');
+(4, 12, 5, 2, 'Meia-entrada', 20.00, '2026-10-16 09:10:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(6, 'Reservado', '2026-09-16 09:10:00', 2),
-(6, 'Pago',      '2026-09-16 09:15:00', 2),
-(6, 'Cancelado', '2026-09-18 09:00:00', 2);
+(6, 'Reservado', '2026-10-16 09:10:00', 2),
+(6, 'Pago',      '2026-10-16 09:15:00', 2),
+(6, 'Cancelado', '2026-10-18 09:00:00', 2);
 
 -- T7: sessao 18+, cliente adulto, inteira, paga
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(5, 21, 1, NULL, 'Inteira', 48.00, '2026-09-17 07:55:00');
+(5, 21, 1, NULL, 'Inteira', 48.00, '2026-10-17 07:55:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(7, 'Reservado', '2026-09-17 07:55:00', 2),
-(7, 'Pago',      '2026-09-17 08:00:00', 2);
+(7, 'Reservado', '2026-10-17 07:55:00', 2),
+(7, 'Pago',      '2026-10-17 08:00:00', 2);
 
 -- T8: sessao livre, crianca de 11 anos, APENAS reservado (situacao em aberto)
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(6, 16, 4, NULL, 'Inteira', 22.00, '2026-09-17 09:00:00');
+(6, 16, 4, NULL, 'Inteira', 22.00, '2026-10-17 09:00:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(8, 'Reservado', '2026-09-17 09:00:00', 1);
+(8, 'Reservado', '2026-10-17 09:00:00', 1);
 
 -- T9: sessao IMAX, meia-entrada (estudante), paga
 INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
-(7, 25, 3, 1, 'Meia-entrada', 16.00, '2026-09-17 09:25:00');
+(7, 25, 3, 1, 'Meia-entrada', 16.00, '2026-10-17 09:25:00');
 INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
-(9, 'Reservado', '2026-09-17 09:25:00', 1),
-(9, 'Pago',      '2026-09-17 09:30:00', 1);
+(9, 'Reservado', '2026-10-17 09:25:00', 1),
+(9, 'Pago',      '2026-10-17 09:30:00', 1);
 
 INSERT INTO produto (nome, categoria, preco_unitario_atual, estoque_atual, estoque_minimo) VALUES
 ('Pipoca Grande', 'Pipoca', 18.00, 40, 10),
@@ -180,80 +180,109 @@ INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
 
 -- Venda do ingresso T1 + pipoca
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(1, 1, '2026-09-09 18:05:00', 46.00);
+(1, 1, '2026-10-09 18:05:00', 46.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (2, 1);
 INSERT INTO venda_produto (id_venda, id_produto, quantidade, preco_unitario_venda) VALUES
 (2, 1, 1, 18.00);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(2, '2026-09-09 18:06:00', 46.00, 'Cartao_Credito');
+(2, '2026-10-09 18:06:00', 46.00, 'Cartao_Credito');
 
 -- Venda do ingresso T2 + refrigerante
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(5, 2, '2026-09-09 18:05:00', 22.00);
+(5, 2, '2026-10-09 18:05:00', 22.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (3, 2);
 INSERT INTO venda_produto (id_venda, id_produto, quantidade, preco_unitario_venda) VALUES
 (3, 2, 1, 8.00);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(3, '2026-09-09 18:07:00', 22.00, 'Pix');
+(3, '2026-10-09 18:07:00', 22.00, 'Pix');
 
 -- Venda avulsa de bomboniere, sem cliente identificado
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(NULL, 1, '2026-09-17 12:00:00', 21.00);
+(NULL, 1, '2026-10-17 12:00:00', 21.00);
 INSERT INTO venda_produto (id_venda, id_produto, quantidade, preco_unitario_venda) VALUES
 (4, 5, 2, 6.00),
 (4, 4, 1, 9.00);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(4, '2026-09-17 12:01:00', 21.00, 'Dinheiro');
+(4, '2026-10-17 12:01:00', 21.00, 'Dinheiro');
 
 -- Venda do ingresso T4
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(3, 2, '2026-09-16 10:10:00', 15.00);
+(3, 2, '2026-10-16 10:10:00', 15.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (5, 4);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(5, '2026-09-16 10:11:00', 15.00, 'Pix');
+(5, '2026-10-16 10:11:00', 15.00, 'Pix');
 
 -- Venda do ingresso T5
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(1, 3, '2026-09-16 09:00:00', 40.00);
+(1, 3, '2026-10-16 09:00:00', 40.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (6, 5);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(6, '2026-09-16 09:01:00', 40.00, 'Cartao_Debito');
+(6, '2026-10-16 09:01:00', 40.00, 'Cartao_Debito');
 
 -- Venda do ingresso T6 (posteriormente cancelado — venda/pagamento originais preservados)
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(5, 2, '2026-09-16 09:15:00', 20.00);
+(5, 2, '2026-10-16 09:15:00', 20.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (7, 6);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(7, '2026-09-16 09:16:00', 20.00, 'Pix');
+(7, '2026-10-16 09:16:00', 20.00, 'Pix');
 
 -- Venda do ingresso T7
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(1, 2, '2026-09-17 08:00:00', 48.00);
+(1, 2, '2026-10-17 08:00:00', 48.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (8, 7);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(8, '2026-09-17 08:01:00', 48.00, 'Cartao_Credito');
+(8, '2026-10-17 08:01:00', 48.00, 'Cartao_Credito');
 
 -- Venda do ingresso T9
 INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
-(3, 1, '2026-09-17 09:30:00', 16.00);
+(3, 1, '2026-10-17 09:30:00', 16.00);
 INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES (9, 9);
 INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
-(9, '2026-09-17 09:31:00', 16.00, 'Dinheiro');
+(9, '2026-10-17 09:31:00', 16.00, 'Dinheiro');
 
--- T3 e T8 continuam apenas "Reservado" (compra nao finalizada), por
--- isso nao tem venda/pagamento associados ainda.
+-- Vendas antecipadas para que as sessoes iniciais tambem aparecam no relatorio de outubro.
+INSERT INTO ingresso (id_sessao, id_assento, id_cliente, id_documento, tipo, preco_pago, data_compra) VALUES
+(3, 3, 2, NULL, 'Inteira', 24.00, '2026-10-17 09:05:00'),
+(6, 17, 4, NULL, 'Inteira', 22.00, '2026-10-17 09:10:00');
+INSERT INTO ingresso_status_historico (id_ingresso, status, data_hora, id_funcionario) VALUES
+(10, 'Reservado', '2026-10-17 09:05:00', 1),
+(10, 'Pago',      '2026-10-17 09:10:00', 1),
+(11, 'Reservado', '2026-10-17 09:10:00', 2),
+(11, 'Pago',      '2026-10-17 09:15:00', 2);
+
+-- T3 e T8 continuam apenas "Reservado"; as vendas abaixo usam outros assentos das mesmas sessoes.
+INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
+(2, 1, '2026-10-17 09:10:00', 24.00),
+(4, 2, '2026-10-17 09:15:00', 22.00);
+INSERT INTO venda_ingresso (id_venda, id_ingresso) VALUES
+(10, 10),
+(11, 11);
+INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
+(10, '2026-10-17 09:11:00', 24.00, 'Pix'),
+(11, '2026-10-17 09:16:00', 22.00, 'Cartao_Debito');
+
+-- Venda avulsa do produto de id 3 dentro do periodo padrao das consultas.
+INSERT INTO venda (id_cliente, id_funcionario, data_venda, valor_total) VALUES
+(1, 1, '2026-10-01 10:00:00', 35.00);
+INSERT INTO venda_produto (id_venda, id_produto, quantidade, preco_unitario_venda) VALUES
+(12, 3, 1, 35.00);
+INSERT INTO pagamento (id_venda, data_pagamento, valor, forma_pagamento) VALUES
+(12, '2026-10-01 10:01:00', 35.00, 'Dinheiro');
 
 INSERT INTO fidelidade_pontos (id_cliente, id_venda, pontos, data_credito, data_expiracao) VALUES
 -- Pontos ja expirados (creditados em 2025, expiram em 2026-06-01 — antes da data de referencia 2026-09-17)
 (1, 1, 35, '2025-06-01 12:05:00', '2026-06-01 12:05:00'),
 -- Pontos ainda validos do mesmo cliente (Ana), em vendas diferentes
-(1, 2, 46, '2026-09-09 18:06:00', '2027-09-09 18:06:00'),
-(1, 6, 40, '2026-09-16 09:01:00', '2027-09-16 09:01:00'),
-(1, 8, 48, '2026-09-17 08:01:00', '2027-09-17 08:01:00'),
-(5, 3, 22, '2026-09-09 18:07:00', '2027-09-09 18:07:00'),
-(5, 7, 20, '2026-09-16 09:16:00', '2027-09-16 09:16:00'),
-(3, 5, 15, '2026-09-16 10:11:00', '2027-09-16 10:11:00'),
-(3, 9, 16, '2026-09-17 09:31:00', '2027-09-17 09:31:00');
+(1, 2, 46, '2026-10-09 18:06:00', '2027-10-09 18:06:00'),
+(1, 6, 40, '2026-10-16 09:01:00', '2027-10-16 09:01:00'),
+(1, 8, 48, '2026-10-17 08:01:00', '2027-10-17 08:01:00'),
+(5, 3, 22, '2026-10-09 18:07:00', '2027-10-09 18:07:00'),
+(5, 7, 20, '2026-10-16 09:16:00', '2027-10-16 09:16:00'),
+(3, 5, 15, '2026-10-16 10:11:00', '2027-10-16 10:11:00'),
+(3, 9, 16, '2026-10-17 09:31:00', '2027-10-17 09:31:00'),
+(2, 10, 24, '2026-10-17 09:11:00', '2027-10-17 09:11:00'),
+(4, 11, 22, '2026-10-17 09:16:00', '2027-10-17 09:16:00'),
+(1, 12, 35, '2026-10-01 10:01:00', '2027-10-01 10:01:00');
 
 
 -- Lote sintetico para cumprir o volume minimo do projeto.
@@ -268,6 +297,7 @@ BEGIN
     DECLARE v_i INT DEFAULT 1;
     DECLARE v_j INT DEFAULT 1;
     DECLARE v_k INT DEFAULT 1;
+    DECLARE v_compra INT DEFAULT 1;
     DECLARE v_filme INT;
     DECLARE v_sala INT;
     DECLARE v_assento_inicio INT;
@@ -287,6 +317,7 @@ BEGIN
     DECLARE v_cargo VARCHAR(20);
     DECLARE v_tipo_sala VARCHAR(10);
     DECLARE v_preco DECIMAL(6,2);
+    DECLARE v_ingressos_sessao INT;
     DECLARE v_preco_produto DECIMAL(6,2);
     DECLARE v_total DECIMAL(8,2);
     DECLARE v_data_compra DATETIME;
@@ -853,7 +884,8 @@ BEGIN
         VALUES (v_nome_produto,v_categoria,5.00 + MOD(v_i,20),100,10);
 
         INSERT INTO sessao (id_filme,id_sala,data_sessao,horario_inicio,idioma,tipo)
-        VALUES (v_filme,v_sala,DATE_ADD('2026-11-15',INTERVAL v_i DAY),'14:00:00',
+        VALUES (v_filme,v_sala,DATE_ADD('2026-11-15',INTERVAL v_i DAY),
+                ELT(1+MOD(v_i-1,5),'10:00:00','12:30:00','15:00:00','17:30:00','20:00:00'),
                 ELT(1+MOD(v_i-1,3),'Dublado','Legendado','Original'),v_tipo_sala);
         SET v_sessao = LAST_INSERT_ID();
         IF v_i=1 THEN SET v_sessao_inicio=v_sessao; END IF;
@@ -862,39 +894,45 @@ BEGIN
         SET v_i = v_i + 1;
     END WHILE;
 
-    -- Cem compras distribuidas em dez sessoes, dez assentos por sessao.
+    -- Cem compras distribuidas em vinte sessoes, com 3 a 7 ingressos por sessao.
     -- Cada compra registra ingresso, status, venda, item de produto, pagamento e pontos.
-    WHILE v_k <= 100 DO
-        SET v_sessao = v_sessao_inicio + FLOOR((v_k-1)/10);
-        SET v_assento = v_assento_inicio + FLOOR((v_k-1)/10)*10 + MOD(v_k-1,10);
-        SET v_cliente = v_cliente_inicio + MOD(v_k-1,40);
-        SET v_funcionario = v_funcionario_inicio + MOD(v_k-1,40);
-        SET v_produto = v_produto_inicio + MOD(v_k-1,40);
-        SET v_preco = 24.00 + MOD(v_k,20);
-        SELECT preco_unitario_atual INTO v_preco_produto FROM produto WHERE id_produto=v_produto;
-        SET v_total = v_preco + v_preco_produto;
-        SET v_data_compra = DATE_ADD('2026-10-01 10:00:00', INTERVAL v_k MINUTE);
+    WHILE v_k <= 20 DO
+        SET v_sessao = v_sessao_inicio + v_k - 1;
+        SET v_ingressos_sessao = 3 + MOD(v_k-1,5);
+        SET v_j = 1;
+        WHILE v_j <= v_ingressos_sessao DO
+            SET v_assento = v_assento_inicio + (v_k-1)*10 + v_j - 1;
+            SET v_cliente = v_cliente_inicio + MOD(v_compra-1,40);
+            SET v_funcionario = v_funcionario_inicio + MOD(v_compra-1,40);
+            SET v_produto = v_produto_inicio + MOD(v_compra-1,40);
+            SET v_preco = 24.00 + MOD(v_compra,20);
+            SELECT preco_unitario_atual INTO v_preco_produto FROM produto WHERE id_produto=v_produto;
+            SET v_total = v_preco + v_preco_produto;
+            SET v_data_compra = DATE_ADD('2026-10-01 10:00:00', INTERVAL v_compra MINUTE);
 
-        INSERT INTO ingresso (id_sessao,id_assento,id_cliente,id_documento,tipo,preco_pago,data_compra)
-        VALUES (v_sessao,v_assento,v_cliente,NULL,'Inteira',v_preco,v_data_compra);
-        SET v_ingresso = LAST_INSERT_ID();
-        INSERT INTO ingresso_status_historico (id_ingresso,status,data_hora,id_funcionario)
-        VALUES (v_ingresso,'Reservado',v_data_compra,v_funcionario),
-               (v_ingresso,'Pago',DATE_ADD(v_data_compra,INTERVAL 5 MINUTE),v_funcionario);
+            INSERT INTO ingresso (id_sessao,id_assento,id_cliente,id_documento,tipo,preco_pago,data_compra)
+            VALUES (v_sessao,v_assento,v_cliente,NULL,'Inteira',v_preco,v_data_compra);
+            SET v_ingresso = LAST_INSERT_ID();
+            INSERT INTO ingresso_status_historico (id_ingresso,status,data_hora,id_funcionario)
+            VALUES (v_ingresso,'Reservado',v_data_compra,v_funcionario),
+                   (v_ingresso,'Pago',DATE_ADD(v_data_compra,INTERVAL 5 MINUTE),v_funcionario);
 
-        INSERT INTO venda (id_cliente,id_funcionario,data_venda,valor_total)
-        VALUES (v_cliente,v_funcionario,DATE_ADD(v_data_compra,INTERVAL 5 MINUTE),v_total);
-        SET v_venda = LAST_INSERT_ID();
-        INSERT INTO venda_ingresso (id_venda,id_ingresso) VALUES (v_venda,v_ingresso);
-        INSERT INTO venda_produto (id_venda,id_produto,quantidade,preco_unitario_venda)
-        VALUES (v_venda,v_produto,1,v_preco_produto);
-        UPDATE produto SET estoque_atual=estoque_atual-1 WHERE id_produto=v_produto;
-        INSERT INTO pagamento (id_venda,data_pagamento,valor,forma_pagamento)
-        VALUES (v_venda,DATE_ADD(v_data_compra,INTERVAL 6 MINUTE),v_total,
-                ELT(1+MOD(v_k-1,4),'Dinheiro','Cartao_Credito','Cartao_Debito','Pix'));
-        INSERT INTO fidelidade_pontos (id_cliente,id_venda,pontos,data_credito,data_expiracao)
-        VALUES (v_cliente,v_venda,FLOOR(v_total),DATE_ADD(v_data_compra,INTERVAL 6 MINUTE),
-                DATE_ADD(v_data_compra,INTERVAL 12 MONTH));
+            INSERT INTO venda (id_cliente,id_funcionario,data_venda,valor_total)
+            VALUES (v_cliente,v_funcionario,DATE_ADD(v_data_compra,INTERVAL 5 MINUTE),v_total);
+            SET v_venda = LAST_INSERT_ID();
+            INSERT INTO venda_ingresso (id_venda,id_ingresso) VALUES (v_venda,v_ingresso);
+            INSERT INTO venda_produto (id_venda,id_produto,quantidade,preco_unitario_venda)
+            VALUES (v_venda,v_produto,1,v_preco_produto);
+            UPDATE produto SET estoque_atual=estoque_atual-1 WHERE id_produto=v_produto;
+            INSERT INTO pagamento (id_venda,data_pagamento,valor,forma_pagamento)
+            VALUES (v_venda,DATE_ADD(v_data_compra,INTERVAL 6 MINUTE),v_total,
+                    ELT(1+MOD(v_compra-1,4),'Dinheiro','Cartao_Credito','Cartao_Debito','Pix'));
+            INSERT INTO fidelidade_pontos (id_cliente,id_venda,pontos,data_credito,data_expiracao)
+            VALUES (v_cliente,v_venda,FLOOR(v_total),DATE_ADD(v_data_compra,INTERVAL 6 MINUTE),
+                    DATE_ADD(v_data_compra,INTERVAL 12 MONTH));
+            SET v_compra = v_compra + 1;
+            SET v_j = v_j + 1;
+        END WHILE;
         SET v_k = v_k + 1;
     END WHILE;
 END$$
