@@ -2,28 +2,30 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Venda de ingressos | Cinema</title>
-  <link rel="stylesheet" th:href="@{/css/cinema.css(v=9)}">
+  <title>Venda de ingressos | FRAMEMARK</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css(v=12)}">
   <script defer th:src="@{/js/tema.js}"></script>
-  <script defer th:src="@{/js/venda-produtos.js(v=8)}"></script>
-  <script defer th:src="@{/js/compra-ingressos.js(v=4)}"></script>
-  <script defer th:src="@{/js/assentos.js}"></script>
+  <script defer th:src="@{/js/venda-produtos.js(v=13)}"></script>
+  <script defer th:src="@{/js/compra-ingressos.js(v=7)}"></script>
+  <script defer th:src="@{/js/assentos.js(v=2)}"></script>
 </head>
 <body>
 <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
 <main class="container ticket-program">
   <a class="back-link" href="/funcionario">← Voltar à área do funcionário</a>
+  <div class="alert" th:if="${erro}" th:text="${erro}"></div>
+  <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
+
+  <div class="session-program" data-session-program th:hidden="${sessaoSelecionada != null}">
   <div class="page-heading">
     <div><span class="eyebrow">BILHETERIA</span><h1>Escolha seu filme e sessão</h1><p>Confira os filmes em cartaz e selecione um horário para continuar a venda.</p></div>
   </div>
-  <div class="alert" th:if="${erro}" th:text="${erro}"></div>
-  <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
 
   <section class="movie-showtime-list" aria-label="Filmes e horários disponíveis">
     <article class="movie-showtime" th:each="filme : ${filmesProgramacao}">
       <div class="movie-poster">
         <div class="movie-poster-placeholder">
-          <span th:text="${filme.genero}">Cinema</span><strong th:text="${filme.titulo}">Filme</strong><small>CINEMA</small>
+          <span th:text="${filme.genero}">Cinema</span><strong th:text="${filme.titulo}">Filme</strong><small>FRAMEMARK</small>
         </div>
       </div>
       <div class="movie-information">
@@ -34,7 +36,7 @@
         <div class="showtime-list" th:if="${!#lists.isEmpty(filme.sessoes)}">
           <a class="showtime-option" th:each="sessao : ${filme.sessoes}"
              th:classappend="${sessaoSelecionada != null and sessaoSelecionada == sessao.id ? 'selected' : ''}"
-             th:href="|/funcionario/vendas-ingressos?sessaoId=${sessao.id}#compra|">
+             th:href="|/funcionario/vendas-ingressos?sessaoId=${sessao.id}|">
             <span class="showtime-date" th:text="${#dates.format(sessao.data, 'EEE, dd/MM')}">Ter, 20/10</span>
             <strong th:text="${#dates.format(sessao.horario, 'HH:mm')}">19:30</strong>
             <small th:text="|${sessao.tipo} · ${sessao.idioma} · Sala ${sessao.sala}|">2D · Dublado · Sala 1</small>
@@ -44,10 +46,16 @@
       </div>
     </article>
   </section>
+  </div>
 
   <section id="compra" class="selected-session-panel" th:if="${sessaoSelecionada != null}" aria-label="Sessão selecionada"
            th:attr="data-ticket-movie=${detalhesSessao.titulo},data-ticket-session=|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} às ${#dates.format(detalhesSessao.horario, 'HH:mm')} · ${detalhesSessao.tipo} · ${detalhesSessao.idioma} · Sala ${detalhesSessao.sala}|,data-ticket-price=${detalhesSessao.preco}">
+    <a class="back-link" href="/funcionario/vendas-ingressos">← Voltar à programação</a>
     <div><span class="eyebrow">SESSÃO SELECIONADA</span><h2 th:text="${detalhesSessao.titulo}">Filme</h2><p th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} às ${#dates.format(detalhesSessao.horario, 'HH:mm')} · ${detalhesSessao.tipo} · ${detalhesSessao.idioma} · Sala ${detalhesSessao.sala}|">Data e horário</p></div>
+    <form class="data-form ticket-form" method="post" th:action="@{/funcionario/vendas-ingressos}" data-seat-form>
+      <input type="hidden" name="sessaoId" th:value="${sessaoSelecionada}">
+      <div data-seat-inputs></div>
+      <div data-seat-stage>
     <div class="seat-map" aria-label="Mapa de assentos">
       <h2>Escolha seu assento</h2>
       <div class="screen" aria-label="Tela">TELA</div>
@@ -67,11 +75,9 @@
         </div>
       </div>
     </div>
-    <form class="data-form ticket-form" method="post" th:action="@{/funcionario/vendas-ingressos}" data-seat-form>
-      <input type="hidden" name="sessaoId" th:value="${sessaoSelecionada}">
-      <input type="hidden" id="assentoId" name="assentoId" required>
       <p class="seat-selection" data-seat-selection>Selecione um assento livre no mapa.</p>
       <div class="form-actions" data-seat-actions><a class="secondary-button" href="/funcionario">Cancelar</a><button class="primary-button" type="button" data-next-products disabled>Continuar</button></div>
+      </div>
 
       <section class="ticket-step" data-ticket-step="products" hidden aria-labelledby="ticket-products-title">
         <div class="ticket-step-layout">
@@ -95,7 +101,7 @@
             </div>
           </div>
           <aside class="ticket-side-panel" aria-label="Resumo do pedido">
-            <div class="ticket-side-panel__top"><span class="eyebrow">RESUMO DO PEDIDO</span><strong data-sidebar-movie th:text="${detalhesSessao.titulo}">Filme</strong><span data-sidebar-session th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} · ${#dates.format(detalhesSessao.horario, 'HH:mm')} · Sala ${detalhesSessao.sala}|">Sessão</span><span data-sidebar-seat>Assento ainda não informado</span></div>
+            <div class="ticket-side-panel__top"><span class="eyebrow">RESUMO DO PEDIDO</span><strong data-sidebar-movie th:text="${detalhesSessao.titulo}">Filme</strong><span data-sidebar-session th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} · ${#dates.format(detalhesSessao.horario, 'HH:mm')} · Sala ${detalhesSessao.sala}|">Sessão</span><span data-sidebar-seats>Nenhum assento selecionado</span></div>
             <div class="ticket-side-panel__items"><strong>Produtos</strong><ul data-sidebar-products><li class="ticket-side-empty">Nenhum produto selecionado</li></ul></div>
             <div class="ticket-side-panel__total"><span>Total</span><strong data-sidebar-total></strong></div>
             <div class="ticket-side-panel__actions"><button class="primary-button" type="button" data-next-summary>Continuar</button><button class="secondary-button" type="button" data-skip-products>Continuar sem produtos</button><button class="secondary-button" type="button" data-back-seat>Voltar aos assentos</button></div>
@@ -106,15 +112,15 @@
       <section class="ticket-step" data-ticket-step="summary" hidden aria-labelledby="ticket-summary-title">
         <div class="ticket-step-heading"><span class="eyebrow">ETAPA 2 DE 3</span><h2 id="ticket-summary-title">Resumo do pedido</h2></div>
         <div class="ticket-step-layout">
-          <div class="ticket-step-main"><div class="ticket-order-summary"><div><span class="eyebrow">INGRESSO</span><strong data-summary-movie></strong><span data-summary-session></span><span data-summary-seat></span><span data-summary-type></span></div><div><span class="eyebrow">PRODUTOS</span><ul data-summary-products></ul><p data-summary-empty hidden>Nenhum produto adicionado.</p></div><div class="ticket-order-total"><span>Total</span><strong data-summary-total></strong></div></div></div>
+          <div class="ticket-step-main"><div class="ticket-order-summary"><div><span class="eyebrow">INGRESSO</span><strong data-summary-movie></strong><span data-summary-session></span><span data-summary-seats></span><span data-summary-type></span></div><div><span class="eyebrow">PRODUTOS</span><ul data-summary-products></ul><p data-summary-empty hidden>Nenhum produto adicionado.</p></div><div class="ticket-order-total"><span>Total</span><strong data-summary-total></strong></div></div></div>
           <aside class="ticket-side-panel ticket-side-panel--actions" aria-label="Ações do pedido"><div class="ticket-side-panel__top"><span class="eyebrow">PRÓXIMO PASSO</span><strong>Pedido revisado?</strong><span>Avance para informar o cliente e a forma de pagamento.</span></div><div class="ticket-side-panel__actions"><button class="primary-button" type="button" data-next-checkout>Ir para finalização</button><button class="secondary-button" type="button" data-back-products>Voltar aos produtos</button></div></aside>
         </div>
       </section>
 
       <section class="ticket-step" data-ticket-step="checkout" hidden aria-labelledby="ticket-checkout-title">
         <div class="ticket-step-layout">
-          <div class="ticket-step-main"><div class="ticket-step-heading"><span class="eyebrow">ETAPA 3 DE 3</span><h2 id="ticket-checkout-title">Finalização do pedido</h2><p>Informe o cliente, o tipo de ingresso e a forma de pagamento.</p></div><div class="ticket-checkout-fields"><div class="field"><label for="clienteId">Cliente</label><select id="clienteId" name="clienteId" required disabled><option value="">Selecione um cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select></div><div class="field"><label for="tipo">Tipo de ingresso</label><select id="tipo" name="tipo" required disabled><option value="Inteira">Inteira</option><option value="Meia-entrada">Meia-entrada</option></select></div><div class="field"><label for="documentoId">Documento de meia-entrada</label><select id="documentoId" name="documentoId" disabled><option value="">Sem documento</option><option th:each="d : ${documentos}" th:value="${d.id}" th:text="${d.rotulo}"></option></select><small>Obrigatório quando o tipo for meia-entrada.</small></div><div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required disabled><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div></div></div>
-          <aside class="ticket-side-panel" aria-label="Finalizar pedido"><div class="ticket-side-panel__top"><span class="eyebrow">RESUMO DO PEDIDO</span><strong th:text="${detalhesSessao.titulo}">Filme</strong><span th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} · ${#dates.format(detalhesSessao.horario, 'HH:mm')} · Sala ${detalhesSessao.sala}|">Sessão</span><span data-sidebar-seat>Assento</span></div><div class="ticket-side-panel__items"><strong>Produtos</strong><ul data-sidebar-products></ul></div><div class="ticket-side-panel__total"><span>Total a pagar</span><strong data-sidebar-total></strong></div><div class="ticket-side-panel__actions"><button class="primary-button" type="submit" data-submit-seat disabled>Finalizar pedido</button><button class="secondary-button" type="button" data-back-summary>Voltar ao resumo</button></div></aside>
+          <div class="ticket-step-main"><div class="ticket-step-heading"><span class="eyebrow">ETAPA 3 DE 3</span><h2 id="ticket-checkout-title">Finalização do pedido</h2><p>Informe o cliente, o tipo de ingresso e a forma de pagamento. O tipo selecionado será aplicado a todos os assentos.</p></div><div class="ticket-checkout-fields"><div class="field"><label for="clienteId">Cliente</label><select id="clienteId" name="clienteId" required disabled><option value="">Selecione um cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select></div><div class="field"><label for="tipo">Tipo de ingresso</label><select id="tipo" name="tipo" required disabled><option value="Inteira">Inteira</option><option value="Meia-entrada">Meia-entrada</option></select></div><div class="field"><label for="documentoId">Documento de meia-entrada</label><select id="documentoId" name="documentoId" disabled><option value="">Sem documento</option><option th:each="d : ${documentos}" th:value="${d.id}" th:text="${d.rotulo}"></option></select><small>Obrigatório quando o tipo for meia-entrada.</small></div><div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required disabled><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div></div></div>
+          <aside class="ticket-side-panel" aria-label="Finalizar pedido"><div class="ticket-side-panel__top"><span class="eyebrow">RESUMO DO PEDIDO</span><strong th:text="${detalhesSessao.titulo}">Filme</strong><span th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} · ${#dates.format(detalhesSessao.horario, 'HH:mm')} · Sala ${detalhesSessao.sala}|">Sessão</span><span data-sidebar-seats>Nenhum assento selecionado</span></div><div class="ticket-side-panel__items"><strong>Produtos</strong><ul data-sidebar-products></ul></div><div class="ticket-side-panel__total"><span>Total a pagar</span><strong data-sidebar-total></strong></div><div class="ticket-side-panel__actions"><button class="primary-button" type="submit" data-submit-seat disabled>Finalizar pedido</button><button class="secondary-button" type="button" data-back-summary>Voltar ao resumo</button></div></aside>
         </div>
       </section>
     </form>

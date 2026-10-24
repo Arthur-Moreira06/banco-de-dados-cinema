@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Venda de produtos | Cinema</title>
-  <link rel="stylesheet" th:href="@{/css/cinema.css(v=9)}">
+  <title>Venda de produtos | FRAMEMARK</title>
+  <link rel="stylesheet" th:href="@{/css/cinema.css(v=15)}">
   <script defer th:src="@{/js/tema.js}"></script>
-  <script defer th:src="@{/js/venda-produtos.js(v=8)}"></script>
+  <script defer th:src="@{/js/venda-produtos.js(v=13)}"></script>
 </head>
 <body>
 <header th:replace="~{fragments/cabecalho :: cabecalho}"></header>
@@ -23,6 +23,7 @@
   <div class="alert" th:if="${erro}" th:text="${erro}"></div>
   <div class="success" th:if="${sucesso}" th:text="${sucesso}"></div>
 
+  <section class="purchase-stage" id="panel-products" aria-label="Produtos disponíveis" data-purchase-panel="products">
   <nav class="product-categories" aria-label="Categorias de produtos">
     <button class="category-chip is-active" type="button" data-filter="Todas" aria-pressed="true">Todos</button>
     <button class="category-chip" type="button" data-filter="Pipoca" aria-pressed="false">Pipoca</button>
@@ -32,6 +33,7 @@
     <button class="category-chip" type="button" data-filter="Outro" aria-pressed="false">Outros</button>
   </nav>
 
+  <div class="product-store-layout">
   <section class="product-grid" aria-label="Produtos disponíveis">
     <article class="product-card" th:each="p : ${produtos}" th:classappend="${p.estoque <= 0 ? 'is-unavailable' : ''}"
              th:attr="data-category=${p.categoria},data-product-id=${p.id},data-product-name=${p.nome},data-product-price=${p.preco},data-stock=${p.estoque}">
@@ -42,55 +44,48 @@
           <strong class="product-card__name" th:text="${p.nome}">Produto</strong>
           <span class="product-card__price" th:text="|R$ ${#numbers.formatDecimal(p.preco,1,2)}|">R$ 0,00</span>
         </span>
-        <span class="product-card__cta"><span th:text="${p.estoque <= 0 ? 'Esgotado' : 'Escolher produto'}">Escolher produto</span><span aria-hidden="true" th:if="${p.estoque > 0}">→</span></span>
+        <span class="product-card__cta"><span th:text="${p.estoque <= 0 ? 'Esgotado' : 'Adicionar produto'}">Adicionar produto</span><span aria-hidden="true" th:if="${p.estoque > 0}">+</span></span>
       </button>
       <div class="product-card__footer">
         <span class="stock-label" th:text="${p.estoque <= 0 ? 'Esgotado' : p.estoque + ' disponíveis'}">Estoque</span>
         <div class="quantity-control" th:attr="data-quantity-control=${p.id}">
           <button type="button" class="quantity-step" data-step="-1" th:disabled="${p.estoque <= 0}" th:attr="aria-label=|Diminuir quantidade de ${p.nome}|">−</button>
-          <output class="quantity-value" aria-live="polite" th:text="${p.estoque > 0 ? 1 : 0}">1</output>
+          <output class="quantity-value" aria-live="polite">0</output>
           <button type="button" class="quantity-step" data-step="1" th:disabled="${p.estoque <= 0}" th:attr="aria-label=|Aumentar quantidade de ${p.nome}|">+</button>
         </div>
       </div>
     </article>
     <p class="product-empty" th:if="${#lists.isEmpty(produtos)}">Não há produtos cadastrados.</p>
   </section>
+  <aside class="ticket-side-panel product-cart" aria-label="Resumo da compra">
+    <div class="ticket-side-panel__top"><span class="eyebrow">SUA COMPRA</span><strong data-cart-count>Nenhum item</strong></div>
+    <ul class="product-cart__items" data-cart-items><li class="ticket-side-empty">Selecione produtos para começar.</li></ul>
+    <div class="ticket-side-panel__total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
+    <button class="primary-button" type="button" data-review-products disabled>Continuar</button>
+  </aside>
+  </div>
+  </section>
 
-  <section class="purchase-panel" id="purchase-section" aria-labelledby="purchase-title">
-    <div class="purchase-panel__heading">
-      <div>
-        <span class="eyebrow">FINALIZAÇÃO</span>
-        <h2 id="purchase-title">Área de compra</h2>
-      </div>
-      <span class="purchase-hint">Selecione um produto acima para começar</span>
+  <section class="purchase-stage purchase-panel" id="panel-summary" aria-labelledby="product-summary-title" data-purchase-panel="summary" hidden>
+    <a class="purchase-back-link" href="#panel-products" data-back-to-products>← Voltar aos produtos</a>
+    <div class="purchase-panel__heading"><div><span class="eyebrow">REVISÃO</span><h2 id="product-summary-title">Resumo do pedido</h2></div></div>
+    <ul class="product-order-lines" data-summary-products></ul>
+    <div class="ticket-order-total product-order-total"><span>Total</span><strong data-summary-total></strong></div>
+    <div class="form-actions"><button class="primary-button" type="button" data-go-checkout>Ir para finalização</button></div>
+  </section>
+
+  <section class="purchase-stage purchase-panel" id="panel-checkout" aria-labelledby="purchase-title" data-purchase-panel="checkout" hidden>
+    <a class="purchase-back-link" href="#panel-summary" data-back-summary>← Voltar ao resumo</a>
+    <div class="purchase-panel__heading"><div><span class="eyebrow">ETAPA FINAL</span><h2 id="purchase-title">Finalização da venda</h2><p>Confira os itens, informe o cliente e selecione a forma de pagamento.</p></div></div>
+    <div class="product-checkout-layout">
+      <div class="product-checkout-summary"><ul class="product-order-lines" data-checkout-products></ul><div class="ticket-order-total product-order-total"><span>Total a pagar</span><strong data-checkout-total></strong></div></div>
+      <form class="data-form product-purchase-form" id="product-purchase-form" method="post" th:action="@{/funcionario/vendas-produtos}">
+        <div data-product-inputs></div>
+        <div class="field"><label for="clienteId">Cliente (opcional)</label><select id="clienteId" name="clienteId"><option value="">Venda sem cadastro de cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select></div>
+        <div class="field"><label for="pagamento">Forma de pagamento</label><select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select></div>
+        <div class="form-actions"><button class="primary-button" type="submit">Finalizar venda</button></div>
+      </form>
     </div>
-    <div class="selected-product" id="selected-product" hidden>
-      <span class="selected-product__photo" id="selected-product-photo" aria-hidden="true"></span>
-      <div class="selected-product__details">
-        <span class="product-card__category" id="selected-product-category"></span>
-        <strong id="selected-product-name"></strong>
-        <span id="selected-product-price"></span>
-      </div>
-      <span class="selected-product__total" id="selected-product-total"></span>
-    </div>
-    <form class="data-form product-purchase-form" id="product-purchase-form" method="post" th:action="@{/funcionario/vendas-produtos}">
-      <input id="produtoId" name="produtoId" type="hidden" required>
-      <div class="field">
-        <label for="quantidade">Quantidade</label>
-        <input id="quantidade" name="quantidade" type="number" min="1" value="1" required disabled>
-      </div>
-      <div class="field">
-        <label for="clienteId">Cliente (opcional)</label>
-        <select id="clienteId" name="clienteId"><option value="">Venda sem cadastro de cliente</option><option th:each="c : ${clientes}" th:value="${c.id}" th:text="|${c.nome} (ID ${c.id})|"></option></select>
-      </div>
-      <div class="field">
-        <label for="pagamento">Forma de pagamento</label>
-        <select id="pagamento" name="pagamento" required><option value="Dinheiro">Dinheiro</option><option value="Cartao_Credito">Cartão de crédito</option><option value="Cartao_Debito">Cartão de débito</option><option value="Pix">Pix</option></select>
-      </div>
-      <div class="form-actions">
-        <button class="primary-button" id="submit-product-sale" type="submit" disabled>Registrar venda</button>
-      </div>
-    </form>
   </section>
 </main>
 </body>

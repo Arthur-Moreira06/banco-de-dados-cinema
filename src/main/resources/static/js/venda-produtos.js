@@ -6,6 +6,8 @@
   const submitButton = document.querySelector("#submit-product-sale");
   const selectedSummary = document.querySelector("#selected-product");
   const purchaseHint = document.querySelector(".purchase-hint");
+  const purchasePanels = [...document.querySelectorAll("[data-purchase-panel]")];
+  const purchaseBackLink = document.querySelector("[data-back-to-products]");
   const photoCatalog = {
     Pipoca: {
       products: {
@@ -250,76 +252,94 @@
     return `/css/${catalog.products[key] ?? catalog.fallback(key)}.png?v=8`;
   };
   if (!document.querySelector("#product-purchase-form")) return;
-  const sourceImageSize = 1254;
-  const sourceCellSize = 410;
-  const sourceCellStep = 422;
-  const categoryKey = { Pipoca: "Pipoca", Bebida: "Bebida", Doce: "Doce", Combo: "Combo", Outro: "Outro" };
-  let selectedCard = null;
 
-  const money = (value) => new Intl.NumberFormat("pt-BR", {
-    style: "currency", currency: "BRL"
-  }).format(value);
+  const money = value => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+  const inputContainer = document.querySelector("[data-product-inputs]");
+  const cartItems = document.querySelector("[data-cart-items]");
+  const quantityFor = card => Number(card.querySelector(".quantity-value").textContent);
+  const cartQuantityFor = card => Number(card.dataset.cartQuantity || 0);
+  const selectedProducts = () => cards.filter(card => cartQuantityFor(card) > 0);
+  const total = () => selectedProducts().reduce((sum, card) => sum + cartQuantityFor(card) * Number(card.dataset.productPrice), 0);
+  const itemLine = card => `${cartQuantityFor(card)}× ${card.dataset.productName} — ${money(cartQuantityFor(card) * Number(card.dataset.productPrice))}`;
 
-  function photoCell(card) {
-    const category = categoryKey[card.dataset.category] ? card.dataset.category : "Outro";
-    const name = card.dataset.productName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    const catalog = photoCatalog[category];
-    if (["Pipoca", "Bebida", "Doce", "Combo", "Outro"].includes(category)) {
-      return { image: window.cinemaProductImage(category, card.dataset.productName), direct: true };
-    }
-    const tile = catalog.products[name] ?? catalog.fallback(name);
-    return { image: catalog.src, row: Math.floor(tile / 3), column: tile % 3 };
+  function updateCardState(card) {
+    const draft = quantityFor(card);
+    const committed = cartQuantityFor(card);
+    const changed = draft !== committed;
+    const selectButton = card.querySelector(".product-card__select");
+    const label = selectButton.querySelector(".product-card__cta span");
+    selectButton.disabled = !changed || Number(card.dataset.stock) <= 0;
+    label.textContent = committed > 0 && draft === 0
+      ? "Remover do carrinho"
+      : committed > 0 ? "Atualizar quantidade" : "Adicionar produto";
+    selectButton.setAttribute("aria-label", `${label.textContent}: ${draft} ${card.dataset.productName}`);
+    card.classList.toggle("has-pending", changed);
   }
-
-  function applyPhoto(photo, card) {
-    const tileSize = photo.clientWidth;
-    if (!tileSize) return;
-    const { image, row, column, direct } = photoCell(card);
-    photo.style.backgroundImage = `url("${image}")`;
-    if (direct) {
-      photo.style.backgroundSize = "cover";
-      photo.style.backgroundPosition = "center";
+  function renderList(list, items) {
+    list.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement("li");
+      empty.className = "ticket-side-empty";
+      empty.textContent = "Selecione produtos para começar.";
+      list.append(empty);
       return;
     }
-    const scale = tileSize / sourceCellSize;
-    photo.style.backgroundSize = `${sourceImageSize * scale}px ${sourceImageSize * scale}px`;
-    photo.style.backgroundPosition = `${-column * sourceCellStep * scale}px ${-row * sourceCellStep * scale}px`;
+    items.forEach(card => {
+      const line = document.createElement("li");
+      line.textContent = itemLine(card);
+      list.append(line);
+    });
   }
 
-  function quantityFor(card) {
-    return Number(card.querySelector(".quantity-value").value || card.querySelector(".quantity-value").textContent);
+  function refreshCart() {
+    const items = selectedProducts();
+    const units = items.reduce((sum, card) => sum + cartQuantityFor(card), 0);
+    renderList(cartItems, items);
+    renderList(document.querySelector("[data-summary-products]"), items);
+    renderList(document.querySelector("[data-checkout-products]"), items);
+    document.querySelector("[data-cart-count]").textContent = units ? `${units} ${units === 1 ? "item" : "itens"}` : "Nenhum item";
+    document.querySelector("[data-cart-total]").textContent = money(total());
+    document.querySelector("[data-summary-total]").textContent = money(total());
+    document.querySelector("[data-checkout-total]").textContent = money(total());
+    document.querySelector("[data-review-products]").disabled = units === 0;
+    cards.forEach(card => {
+      card.classList.toggle("is-selected", cartQuantityFor(card) > 0);
+      updateCardState(card);
+    });
+    inputContainer.replaceChildren();
+    items.forEach(card => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = `produto_${card.dataset.productId}`;
+      input.value = String(cartQuantityFor(card));
+      inputContainer.append(input);
+    });
   }
 
-  function updateTotal() {
-    if (!selectedCard || !quantityInput.value) return;
-    const price = Number(selectedCard.dataset.productPrice);
-    const quantity = Number(quantityInput.value);
-    document.querySelector("#selected-product-total").textContent = `Total: ${money(price * quantity)}`;
+  function setQuantity(card, quantity) {
+    const next = Math.max(0, Math.min(Number(card.dataset.stock), quantity));
+    card.querySelector(".quantity-value").textContent = String(next);
+    updateCardState(card);
   }
 
-  function selectProduct(card) {
-    if (Number(card.dataset.stock) <= 0) return;
-    selectedCard = card;
-    productId.value = card.dataset.productId;
-    const quantity = quantityFor(card);
-    quantityInput.value = quantity;
-    quantityInput.max = card.dataset.stock;
-    quantityInput.disabled = false;
-    submitButton.disabled = false;
-
-    document.querySelector("#selected-product-category").textContent = card.dataset.category;
-    document.querySelector("#selected-product-name").textContent = card.dataset.productName;
-    document.querySelector("#selected-product-price").textContent = `${money(Number(card.dataset.productPrice))} por unidade`;
-    const image = card.querySelector(".product-photo");
-    const selectedImage = document.querySelector("#selected-product-photo");
-    selectedImage.className = `selected-product__photo ${[...image.classList].find(name => name.startsWith("product-photo--")) || ""}`;
-    selectedSummary.hidden = false;
-    applyPhoto(selectedImage, card);
-    purchaseHint.hidden = true;
-    cards.forEach(item => item.classList.toggle("is-selected", item === card));
-    updateTotal();
-    document.querySelector("#purchase-section").scrollIntoView({ behavior: "smooth", block: "start" });
+  function activatePurchaseStage(name) {
+    purchasePanels.forEach(panel => { panel.hidden = panel.dataset.purchasePanel !== name; });
   }
+
+  document.querySelector("[data-review-products]").addEventListener("click", () => {
+    if (!selectedProducts().length) return;
+    refreshCart();
+    activatePurchaseStage("summary");
+  });
+  document.querySelector("[data-back-to-products]").addEventListener("click", event => {
+    event.preventDefault();
+    activatePurchaseStage("products");
+  });
+  document.querySelector("[data-go-checkout]").addEventListener("click", () => activatePurchaseStage("checkout"));
+  document.querySelector("[data-back-summary]").addEventListener("click", event => {
+    event.preventDefault();
+    activatePurchaseStage("summary");
+  });
 
   filters.forEach(filter => filter.addEventListener("click", () => {
     const category = filter.dataset.filter;
@@ -328,49 +348,26 @@
       item.classList.toggle("is-active", active);
       item.setAttribute("aria-pressed", String(active));
     });
-    cards.forEach(card => {
-      card.hidden = category !== "Todas" && card.dataset.category !== category;
-    });
+    cards.forEach(card => { card.hidden = category !== "Todas" && card.dataset.category !== category; });
   }));
 
   cards.forEach(card => {
+    card.dataset.cartQuantity = "0";
     const photo = card.querySelector(".product-photo");
-    applyPhoto(photo, card);
-    card.querySelector(".product-card__select").addEventListener("click", () => selectProduct(card));
-    const controls = card.querySelector(".quantity-control");
-    controls.querySelectorAll(".quantity-step").forEach(button => button.addEventListener("click", () => {
-      const output = controls.querySelector(".quantity-value");
-      const next = Math.min(Number(card.dataset.stock), Math.max(1, Number(output.textContent) + Number(button.dataset.step)));
-      output.textContent = String(next);
-      if (selectedCard === card) {
-        quantityInput.value = String(next);
-        updateTotal();
-      }
+    photo.style.backgroundImage = `url("${window.cinemaProductImage(card.dataset.category, card.dataset.productName)}")`;
+    photo.style.backgroundSize = "cover";
+    photo.style.backgroundPosition = "center";
+    card.querySelector(".product-card__select").addEventListener("click", () => {
+      card.dataset.cartQuantity = String(quantityFor(card));
+      refreshCart();
+    });
+    card.querySelectorAll(".quantity-step").forEach(button => button.addEventListener("click", () => {
+      setQuantity(card, quantityFor(card) + Number(button.dataset.step));
     }));
   });
 
-  if ("ResizeObserver" in window) {
-    const photoObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        const card = entry.target.closest(".product-card");
-        if (card) applyPhoto(entry.target, card);
-      });
-      if (selectedCard) applyPhoto(document.querySelector("#selected-product-photo"), selectedCard);
-    });
-    cards.forEach(card => photoObserver.observe(card.querySelector(".product-photo")));
-  } else {
-    window.addEventListener("resize", () => {
-      cards.forEach(card => applyPhoto(card.querySelector(".product-photo"), card));
-      if (selectedCard) applyPhoto(document.querySelector("#selected-product-photo"), selectedCard);
-    });
-  }
-
-  quantityInput.addEventListener("input", () => {
-    if (!selectedCard) return;
-    const max = Number(selectedCard.dataset.stock);
-    const value = Math.max(1, Math.min(max, Number(quantityInput.value || 1)));
-    quantityInput.value = String(value);
-    selectedCard.querySelector(".quantity-value").textContent = String(value);
-    updateTotal();
+  document.querySelector("#product-purchase-form").addEventListener("submit", event => {
+    if (!selectedProducts().length) event.preventDefault();
   });
+  refreshCart();
 })();

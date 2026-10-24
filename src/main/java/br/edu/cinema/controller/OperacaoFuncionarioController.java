@@ -42,13 +42,20 @@ public class OperacaoFuncionarioController {
     }
 
     @PostMapping("/vendas-produtos")
-    public String venderProduto(@RequestParam int produtoId, @RequestParam int quantidade,
-            @RequestParam(required=false) Integer clienteId, @RequestParam String pagamento,
-            HttpSession session, RedirectAttributes flash) {
+    public String venderProduto(@RequestParam(required=false) Integer clienteId, @RequestParam String pagamento,
+            @RequestParam Map<String,String> parametros, HttpSession session, RedirectAttributes flash) {
         UsuarioAutenticado usuario = (UsuarioAutenticado) session.getAttribute("usuario");
         try {
-            vendas.venderProduto(produtoId, quantidade, clienteId, usuario.id(), pagamento);
-            flash.addFlashAttribute("sucesso", "Venda de produto registrada.");
+            Map<Integer,Integer> produtos = new LinkedHashMap<>();
+            parametros.forEach((chave, valor) -> {
+                if (chave.startsWith("produto_")) {
+                    int produtoId = Integer.parseInt(chave.substring("produto_".length()));
+                    int quantidade = Integer.parseInt(valor);
+                    if (quantidade > 0) produtos.put(produtoId, quantidade);
+                }
+            });
+            vendas.venderProdutos(produtos, clienteId, usuario.id(), pagamento);
+            flash.addFlashAttribute("sucesso", "Venda de produtos registrada.");
         } catch (Exception e) {
             flash.addFlashAttribute("erro", mensagem(e));
         }
@@ -93,7 +100,7 @@ public class OperacaoFuncionarioController {
     }
 
     @PostMapping("/vendas-ingressos")
-    public String venderIngresso(@RequestParam int sessaoId, @RequestParam int assentoId,
+    public String venderIngresso(@RequestParam int sessaoId, @RequestParam(name="assentoIds") List<Integer> assentoIds,
             @RequestParam int clienteId, @RequestParam(required=false) Integer documentoId,
             @RequestParam String tipo, @RequestParam String pagamento, @RequestParam Map<String,String> parametros,
             HttpSession session, RedirectAttributes flash) {
@@ -107,7 +114,7 @@ public class OperacaoFuncionarioController {
                     if (quantidade > 0) produtos.put(produtoId, quantidade);
                 }
             });
-            vendas.venderIngresso(sessaoId, assentoId, clienteId, documentoId, tipo, usuario.id(), pagamento, produtos);
+            vendas.venderIngressos(sessaoId, assentoIds, clienteId, documentoId, tipo, usuario.id(), pagamento, produtos);
             flash.addFlashAttribute("sucesso", "Pedido finalizado com sucesso.");
         } catch (Exception e) {
             flash.addFlashAttribute("erro", mensagem(e));
