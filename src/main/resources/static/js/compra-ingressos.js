@@ -38,6 +38,7 @@
     form.querySelector("[data-summary-seats]").textContent = seatLabels.length ? "Assentos " + seatLabels.join(", ") : "Nenhum assento selecionado";
     form.querySelector("[data-summary-type]").textContent = `Ingresso ${typeSelect.value}`;
     const chosen = productCards.filter(card => quantityOf(card) > 0);
+    form.querySelector("[data-next-summary]").textContent = chosen.length ? "Continuar" : "Continuar sem produtos";
     const renderItems = list => {
       list.replaceChildren();
       if (chosen.length === 0) {
@@ -75,16 +76,6 @@
     showStep("products");
   });
   form.querySelector("[data-back-seat]").addEventListener("click", () => showStep("seat"));
-  form.querySelector("[data-skip-products]").addEventListener("click", () => {
-    productCards.forEach(card => {
-      const quantity = card.querySelector("[data-product-quantity]");
-      quantity.dataset.productQuantity = "0";
-      quantity.textContent = "0";
-      card.querySelector("[data-product-input]").value = "0";
-    });
-    refreshSummary();
-    showStep("summary");
-  });
   form.querySelector("[data-next-summary]").addEventListener("click", () => showStep("summary"));
   form.querySelector("[data-back-products]").addEventListener("click", () => showStep("products"));
   form.querySelector("[data-next-checkout]").addEventListener("click", () => showStep("checkout"));

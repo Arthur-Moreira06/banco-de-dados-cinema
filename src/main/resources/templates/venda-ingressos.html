@@ -6,7 +6,7 @@
   <link rel="stylesheet" th:href="@{/css/cinema.css(v=12)}">
   <script defer th:src="@{/js/tema.js}"></script>
   <script defer th:src="@{/js/venda-produtos.js(v=13)}"></script>
-  <script defer th:src="@{/js/compra-ingressos.js(v=7)}"></script>
+  <script defer th:src="@{/js/compra-ingressos.js(v=8)}"></script>
   <script defer th:src="@{/js/assentos.js(v=2)}"></script>
 </head>
 <body>
@@ -104,7 +104,7 @@
             <div class="ticket-side-panel__top"><span class="eyebrow">RESUMO DO PEDIDO</span><strong data-sidebar-movie th:text="${detalhesSessao.titulo}">Filme</strong><span data-sidebar-session th:text="|${#dates.format(detalhesSessao.data, 'dd/MM/yyyy')} · ${#dates.format(detalhesSessao.horario, 'HH:mm')} · Sala ${detalhesSessao.sala}|">Sessão</span><span data-sidebar-seats>Nenhum assento selecionado</span></div>
             <div class="ticket-side-panel__items"><strong>Produtos</strong><ul data-sidebar-products><li class="ticket-side-empty">Nenhum produto selecionado</li></ul></div>
             <div class="ticket-side-panel__total"><span>Total</span><strong data-sidebar-total></strong></div>
-            <div class="ticket-side-panel__actions"><button class="primary-button" type="button" data-next-summary>Continuar</button><button class="secondary-button" type="button" data-skip-products>Continuar sem produtos</button><button class="secondary-button" type="button" data-back-seat>Voltar aos assentos</button></div>
+            <div class="ticket-side-panel__actions"><button class="primary-button" type="button" data-next-summary>Continuar sem produtos</button><button class="secondary-button" type="button" data-back-seat>Voltar aos assentos</button></div>
           </aside>
         </div>
       </section>

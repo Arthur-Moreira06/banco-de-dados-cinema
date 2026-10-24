@@ -95,7 +95,7 @@ public class OperacaoFuncionarioController {
         model.addAttribute("assentos", assentos);
         model.addAttribute("fileiras", fileiras.entrySet());
         model.addAttribute("clientes", jdbc.queryForList("SELECT id_cliente AS id,nome FROM cliente ORDER BY nome"));
-        model.addAttribute("documentos", jdbc.queryForList("SELECT d.id_documento AS id,CONCAT(d.id_documento,' — Cliente ',d.id_cliente,' — ',d.tipo_documento) AS rotulo FROM documento_meia_entrada d JOIN cliente c ON c.id_cliente=d.id_cliente WHERE (d.validade IS NULL OR d.validade>=CURDATE()) AND (d.tipo_documento<>'Idoso' OR c.data_nascimento<=DATE_SUB(CURDATE(),INTERVAL 60 YEAR)) ORDER BY d.id_cliente,d.tipo_documento"));
+        model.addAttribute("documentos", jdbc.queryForList("SELECT d.id_documento AS id,CASE d.tipo_documento WHEN 'Deficiencia' THEN 'PCD' ELSE d.tipo_documento END AS rotulo FROM documento_meia_entrada d JOIN cliente c ON c.id_cliente=d.id_cliente WHERE (d.validade IS NULL OR d.validade>=CURDATE()) AND (d.tipo_documento<>'Idoso' OR c.data_nascimento<=DATE_SUB(CURDATE(),INTERVAL 60 YEAR)) ORDER BY d.tipo_documento,d.id_documento"));
         return "venda-ingressos";
     }
 

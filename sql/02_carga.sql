@@ -62,11 +62,12 @@ INSERT INTO cliente (nome, cpf, telefone, email, data_nascimento) VALUES
 ('Carlos Eduardo Matos',  '66622233344', NULL,               'carlos.matos@exemplo.com', '2010-08-01'),
 ('Juliana Ramos Vieira',  '66633344455', '(61) 98111-0003', 'juliana.vieira@exemplo.com', '1985-12-20'),
 ('Pedro Henrique Silva',  '66644455566', '(61) 98111-0004', 'pedro.silva@exemplo.com', '2015-03-10'),
-('Fernanda Costa Lima',   '66655566677', '(61) 98111-0005', 'fernanda.lima@exemplo.com', '1972-07-07');
+('Fernanda Costa Lima',   '66655566677', '(61) 98111-0005', 'fernanda.lima@exemplo.com', '1960-07-07');
 
 INSERT INTO documento_meia_entrada (id_cliente, tipo_documento, numero_documento, validade) VALUES
 (3, 'Estudante', 'CE-2026-004521', '2026-12-20'),
-(5, 'Idoso', 'RG-IDOSO-778899', NULL);
+(5, 'Idoso', 'RG-IDOSO-778899', NULL),
+(1, 'Deficiencia', 'PCD-2026-000001', NULL);
 
 -- sessao ocorrida em outubro, com status "Utilizado" apos a exibicao
 INSERT INTO sessao (id_filme, id_sala, data_sessao, horario_inicio, idioma, tipo) VALUES
