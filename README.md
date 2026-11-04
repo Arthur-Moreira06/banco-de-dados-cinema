@@ -27,16 +27,7 @@ O DDL recria o banco inteiro. Em uma base com dados que precisam ser mantidos, f
 
 ## Usuário e credenciais da aplicação
 
-No Workbench, como administrador, crie/configure a conta local da aplicação:
-
-```sql
-CREATE USER IF NOT EXISTS 'cinema_app'@'localhost'
-    IDENTIFIED BY 'CinemaApresentacao#26';
-ALTER USER 'cinema_app'@'localhost'
-    IDENTIFIED BY 'CinemaApresentacao#26';
-GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.*
-    TO 'cinema_app'@'localhost';
-```
+Aviso: o usuário agora é criado pelo 01_ddl.sql, sem passo manual.
 
 Crie um arquivo `.env` na raiz ou defina estas variáveis no ambiente:
 
