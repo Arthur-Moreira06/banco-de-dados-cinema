@@ -23,20 +23,11 @@ Depois da carga, as principais dimensões têm pelo menos 40 registros; o lote i
 
 ## Bancos existentes
 
-O DDL recria o banco inteiro. Em uma base com dados que precisam ser mantidos, faça backup antes e não execute `sql/01_ddl.sql` sem planejar migração. Os scripts `04` e `05` citados em versões antigas do README não fazem parte desta entrega.
+O DDL recria o banco inteiro. Em uma base com dados que precisam ser mantidos, faça backup antes e não execute `sql/01_ddl.sql` sem planejar migração.
 
 ## Usuário e credenciais da aplicação
 
-No Workbench, como administrador, crie/configure a conta local da aplicação:
-
-```sql
-CREATE USER IF NOT EXISTS 'cinema_app'@'localhost'
-    IDENTIFIED BY 'CinemaApresentacao#26';
-ALTER USER 'cinema_app'@'localhost'
-    IDENTIFIED BY 'CinemaApresentacao#26';
-GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.*
-    TO 'cinema_app'@'localhost';
-```
+Aviso: o usuário agora é criado pelo 01_ddl.sql, sem passo manual.
 
 Crie um arquivo `.env` na raiz ou defina estas variáveis no ambiente:
 
