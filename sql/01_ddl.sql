@@ -472,3 +472,11 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+CREATE USER IF NOT EXISTS 'cinema_app'@'localhost' IDENTIFIED BY 'CinemaApresentacao#26';
+ALTER USER 'cinema_app'@'localhost' IDENTIFIED BY 'CinemaApresentacao#26';
+CREATE ROLE IF NOT EXISTS 'cinema_app_role';
+GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.* TO 'cinema_app_role';
+GRANT 'cinema_app_role' TO 'cinema_app'@'localhost';
+SET DEFAULT ROLE 'cinema_app_role' TO 'cinema_app'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON cinema.* TO 'cinema_app'@'localhost';
